@@ -2,16 +2,13 @@ const sequelize = require("../database/db.js")
 
 const { DataTypes, Model } = require("sequelize");
 
-class Category extends Model {
+class PaymentMethod extends Model {
     getName() {
         return this.name.toUpperCase();
     }
-    static associate(models) {
-      Category.hasMany(models.Product, { foreignKey: 'category_id' });
-    }
 }
 
-Category.init({
+PaymentMethod.init({
     // Model attributes are defined here
     name: {
       type: DataTypes.STRING(45),
@@ -24,8 +21,8 @@ Category.init({
   }, {
     // Other model options go here
     sequelize, // We need to pass the connection instance
-    modelName: 'Category', // We need to choose the model name
-    tableName: 'categories'
+    modelName: 'PaymentMethod', // We need to choose the model name
+    tableName: 'payment_methods'
 });
 
-module.exports = Category
+module.exports = PaymentMethod
