@@ -1,5 +1,5 @@
 const sequelize = require("../database/db.js");
-const { DataTypes, Model } = require("sequelize");
+const { Sequelize, DataTypes, Model } = require("sequelize");
 
 const Customer = require("./CustomerModel.js");
 
@@ -13,7 +13,10 @@ class Sale extends Model {
 Sale.init(
     {   
         code: { type: DataTypes.STRING(10) },
-        date: { type: DataTypes.DATE() },
+        date: { 
+            type: DataTypes.DATE(),
+            defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+        },
         customer_id: {
             type: DataTypes.INTEGER(),
             allowNull: false,
@@ -28,7 +31,15 @@ Sale.init(
             type: DataTypes.INTEGER(),
             allowNull: false
         },
-        total_amout: {
+        exchange_amount:{
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: false
+        },
+        total_amount: {
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: false
+        },
+        total_local_amount: {
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
         },

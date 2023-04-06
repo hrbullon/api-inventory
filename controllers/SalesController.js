@@ -28,8 +28,13 @@ const createSale = async (req, res) => {
     try {
 
         const details = req.body.sale_details;
+        
         delete req.body.sale_details;
+        delete req.body.code;
+        delete req.body.date;
+
         const model = { ...req.body };
+        model.user_id = 1;
 
         const sale = await Sale.create(model);
         const detailsModel = [];

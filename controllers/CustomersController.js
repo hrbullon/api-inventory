@@ -18,6 +18,19 @@ const getCustomerById = async (req, res) => {
     }
 }
 
+const getCustomerByDni = async (req, res) => {
+    try {
+        const customer = await Customer.findOne({
+            where: {
+                dni: req.params.dni
+            }
+        });
+        res.json({ message: 'ok', customer});
+    } catch (error) {
+        res.json({ message: error.message });
+    }
+}
+
 const createCustomer = async (req, res) => {
     try {
         const customer = await Customer.create(req.body);
@@ -56,6 +69,7 @@ const deleteCustomer = async (req, res) => {
 
 module.exports = {
     getCustomerById,
+    getCustomerByDni,
     createCustomer,
     updateCustomer,
     getAllCustomers,

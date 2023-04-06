@@ -9,13 +9,9 @@ class Customer extends Model {
 
 Customer.init({
     // Model attributes are defined here
-    firstname: { 
+    name: { 
         type: DataTypes.STRING(45),
         allowNull: false
-    },
-    lastname: {
-      type: DataTypes.STRING(45),
-      allowNull: false
     },
     dni: { 
         type: DataTypes.STRING(20),
