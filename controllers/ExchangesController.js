@@ -2,7 +2,10 @@ const Exchange = require("../models/ExchangeModel");
 
 const getAllExchanges = async (req, res) => {
     try {
-        const exchanges = await Exchange.findAll();
+        const exchanges = await Exchange.findAll({
+            order: [ [ 'date', 'DESC' ]],
+            limit: req.params.limit? parseInt(req.params.limit) : null
+        });
         res.json({ message: "Ok", exchanges });
     } catch (error) {
         res.json({ message: error.message });

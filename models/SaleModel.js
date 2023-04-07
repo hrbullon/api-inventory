@@ -14,7 +14,7 @@ Sale.init(
     {   
         code: { type: DataTypes.STRING(10) },
         date: { 
-            type: DataTypes.DATE(),
+            type: DataTypes.DATEONLY(),
             defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
         },
         customer_id: {

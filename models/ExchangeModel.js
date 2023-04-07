@@ -7,7 +7,7 @@ class Exchange extends Model {}
 Exchange.init({
     // Model attributes are defined here
     date: {
-      type: DataTypes.DATE(),
+      type: DataTypes.DATEONLY(),
       allowNull: false
     },
     amount: {

@@ -33,6 +33,9 @@ SaleDetails.init(
             onDelete:'cascade',
             onUpdate:'cascade'
         },
+        code: {
+            type: DataTypes.STRING(150)
+        },
         description: {
             type: DataTypes.STRING(45),
             allowNull: false

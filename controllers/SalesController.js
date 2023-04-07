@@ -5,7 +5,10 @@ const Sale = require("../models/SaleModel");
 const getAllSales = async (req, res) => {
     try {
         const sales = await Sale.findAll(
-            { include: [Customer, SaleDetails] }
+            { 
+                include: [Customer, SaleDetails],
+                order: [ [ 'createdAt', 'DESC' ]]
+            }
         );
         res.json({ message: "Ok", sales });
     } catch (error) {
@@ -27,6 +30,7 @@ const getSaleById = async (req, res) => {
 const createSale = async (req, res) => {
     try {
 
+        const { total_amount, exchange_amount} = req.body;
         const details = req.body.sale_details;
         
         delete req.body.sale_details;
@@ -34,6 +38,7 @@ const createSale = async (req, res) => {
         delete req.body.date;
 
         const model = { ...req.body };
+        model.total_local_amount = (total_amount*exchange_amount);
         model.user_id = 1;
 
         const sale = await Sale.create(model);
