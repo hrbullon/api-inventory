@@ -9,7 +9,7 @@ const {
 
 let app = express(); 
 
-app.get('/sales', getAllSales);
+app.get('/sales/:details?', getAllSales);
 app.get('/sales/:id', getSaleById);
 app.post('/sales', createSale);
 app.put('/sales/:id', updateSale);

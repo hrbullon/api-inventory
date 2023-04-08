@@ -39,7 +39,7 @@ Sale.init(
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
         },
-        total_local_amount: {
+        total_amount_converted: {
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
         },

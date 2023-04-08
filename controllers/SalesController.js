@@ -1,16 +1,57 @@
+const moment = require("moment/moment");
 const Customer = require("../models/CustomerModel");
 const SaleDetails = require("../models/SaleDetailsModel");
 const Sale = require("../models/SaleModel");
 
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+
 const getAllSales = async (req, res) => {
     try {
-        const sales = await Sale.findAll(
-            { 
-                include: [Customer, SaleDetails],
-                order: [ [ 'createdAt', 'DESC' ]]
+        if(!req.params.details){
+            const sales = await Sale.findAll(
+                { 
+                    include: [Customer, SaleDetails],
+                    order: [ [ 'createdAt', 'DESC' ]]
+                }
+            );
+            res.json({ message: "Ok", sales });
+        }else{
+
+            let condition;
+
+            if(req.params.details == "month"){
+
+                // Get the current year and month
+                const year = new Date().getFullYear();
+                const month = new Date().getMonth() + 1;
+
+                condition = {
+                    date: {
+                        [Op.and]: [
+                            { [Op.gte]: new Date(year, month - 1, 1) }, // Start of current month
+                            { [Op.lt]: new Date(year, month, 1) } // Start of next month
+                        ]
+                    }
+                }
+
             }
-        );
-        res.json({ message: "Ok", sales });
+
+            if(req.params.details == "today"){
+                const date = moment().format("YYYY-MM-DD");
+                condition = { date: date }
+            }
+
+            const sales = await SaleDetails.findAll({
+               include: [ {
+                model: Sale,
+                where: condition
+               }],
+            });
+
+            res.json({ message: "Ok", sales });
+        }
+        
     } catch (error) {
         res.json({ message: error.message });
     }
@@ -38,7 +79,7 @@ const createSale = async (req, res) => {
         delete req.body.date;
 
         const model = { ...req.body };
-        model.total_local_amount = (total_amount*exchange_amount);
+        model.total_amount_converted = (total_amount/exchange_amount);
         model.user_id = 1;
 
         const sale = await Sale.create(model);
