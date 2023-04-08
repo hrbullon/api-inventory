@@ -23,8 +23,8 @@ app.use(cors());
 app.use( require('./routes/index') );
 
 // Define routes and middleware functions
-app.get('/', (req, res) => {
-    res.send('Hello, World!')
+app.get('/images/:image', (req, res) => {
+    res.sendFile(__dirname + `/uploads/${req.params.image}`);
 });
 
 //Database Connection and Syncronize all models

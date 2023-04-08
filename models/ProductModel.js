@@ -9,12 +9,12 @@ class Product extends Model {
 }
 
 Product.init({
-    code: { type: DataTypes.STRING(150) },
+    code: { type: DataTypes.STRING(20) },
     name: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.STRING(150),
         allowNull: false
     },
-    description: { type: DataTypes.STRING(150) },
+    description: { type: DataTypes.STRING(300) },
     category_id: { type: DataTypes.INTEGER() },
     brand: { type: DataTypes.STRING(45) },
     model: { type: DataTypes.STRING(45) },
