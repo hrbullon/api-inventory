@@ -1,6 +1,6 @@
 const Product = require("../models/ProductModel");
-const fs = require('fs');
 const filterFileType = require("../utils/utils");
+const Category = require("../models/CategoryModel");
 
 require('dotenv').config();
 
@@ -15,7 +15,9 @@ const getAllProducts = async (req, res) => {
 
 const getProductById = async (req, res) => {
     try {
-        const product = await Product.findByPk(req.params.id);
+        const product = await Product.findByPk(req.params.id, {
+            include: [Category]
+        });
         res.json({ message: "Ok", product });
     } catch (error) {
         res.json({ message: error.message });

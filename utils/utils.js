@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const filterFileType = (file) => {
 
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
