@@ -19,13 +19,16 @@ app.use(bodyParser.json());
 //CORS is enabled for all origins
 app.use(cors());
 
-//Routes
-app.use( require('./routes/index') );
-
-// Define routes and middleware functions
+// Define images routes before middleware authenticated to skip validation
 app.get('/images/:image', (req, res) => {
     res.sendFile(__dirname + `/uploads/${req.params.image}`);
 });
+
+//Authenticated Middleware
+app.use( require('./middleware/authenticated').verifyToken );
+
+//Routes
+app.use( require('./routes/index') );
 
 //Database Connection and Syncronize all models
 require('./models/index'); 
