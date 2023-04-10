@@ -24,6 +24,8 @@ app.get('/images/:image', (req, res) => {
     res.sendFile(__dirname + `/uploads/${req.params.image}`);
 });
 
+app.use( require('./routes/auth') );
+
 //Authenticated Middleware
 app.use( require('./middleware/authenticated').verifyToken );
 

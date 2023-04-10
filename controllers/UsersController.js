@@ -5,7 +5,9 @@ const User = require("../models/UserModel");
 
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.findAll();
+        const users = await User.findAll({
+            attributes: { exclude: ['password','createdAt','updatedAt'] }
+        });
         res.json({ message: "Ok", users });
     } catch (error) {
         res.json({ message: error.message });

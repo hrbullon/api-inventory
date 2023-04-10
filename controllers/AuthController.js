@@ -23,6 +23,9 @@ const login = async (req, res) => {
         if (!bcrypt.compareSync(body.password, user.password)) {
             return res.status(400).json({ message: "Usuario o contraseña incorrectos" });
         }
+        
+        user.password = "┌∩┐(◣_◢)┌∩┐";
+        user.role = (user.role == "1")? "ADM_ROLE" : "STD_ROLE";
 
         let token = jwt.sign({
             user: user

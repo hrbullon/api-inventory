@@ -3,7 +3,6 @@ const express = require('express');
 const app = express();
 
 app.use( require('./admin') );
-app.use( require('./auth') );
 app.use( require('./category') );
 app.use( require('./exchange') );
 app.use( require('./company') );
