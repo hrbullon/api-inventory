@@ -19,6 +19,11 @@ const login = async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: 'Usuario o contraseña incorrectos' });
         }
+        
+        //Is user inactive ?
+        if (user && user.state == "0") {
+            return res.status(403).json({ message: `Usuario inactivo, comunícaquese con el administrador!` });
+        }
 
         if (!bcrypt.compareSync(body.password, user.password)) {
             return res.status(400).json({ message: "Usuario o contraseña incorrectos" });

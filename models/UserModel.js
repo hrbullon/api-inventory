@@ -1,10 +1,9 @@
+const bcrypt = require('bcrypt');
+
 const sequelize = require("../database/db.js")
 const { DataTypes, Model } = require("sequelize");
 
 class User extends Model {
-    getName() {
-        return `${this.firstname} ${this.lastname}`;
-    }
     static associate(models){
         User.hasMany(models.RoleUser, { foreignKey: 'user_id' });
     }
@@ -30,7 +29,7 @@ User.init({
     account: { type: DataTypes.STRING(45) },
     role: { type: DataTypes.TINYINT(1), comment: "1->admin,2->standar" },
     password: { type: DataTypes.STRING(100) },
-    state: { type: DataTypes.TINYINT(1), comment: "0->Inactive,1->Active" }
+    state: { type: DataTypes.ENUM("0","1"), comment: "0->Inactive,1->Active" }
 
   }, {
     // Other model options go here
@@ -39,5 +38,28 @@ User.init({
     tableName: 'users',
     exclude: ['password']
 });
+
+  
+sequelize.sync()
+.then(() => {
+    return User.findOrCreate({
+        where: { id: 1, account: "admin"},
+        defaults: {
+            dni:"V20000000",
+            firstname:"John",
+            lastname:"Doe",
+            email:"mail@domain.com",
+            phone:"12345678910",
+            address:"My address",
+            account:"admin",
+            role:1,
+            password: bcrypt.hashSync("adm123456", 10),
+            state:1 }
+    });
+}).then(([record, created]) => {
+    console.log(record.get({
+    plain: true
+}))
+    console.log(created) })
 
 module.exports = User;
