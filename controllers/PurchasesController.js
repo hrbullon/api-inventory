@@ -1,3 +1,4 @@
+const Product = require("../models/ProductModel");
 const PurchaseDetails = require("../models/PurchaseDetailsModel");
 const Purchase = require("../models/PurchaseModel");
 
@@ -43,6 +44,15 @@ const createPurchase = async (req, res) => {
         })
         
         await PurchaseDetails.bulkCreate(detailsModel);
+
+        //Increment stock on products
+        detailsModel.map( item => {
+            Product.findByPk(item.product_id)
+            .then(product => {
+                product.increment('quantity', { by: item.quantity });
+            });
+        });
+
         res.status(201).json({ message: "Ok", purchase });
 
     } catch (error) {

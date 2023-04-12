@@ -1,7 +1,9 @@
 const moment = require("moment/moment");
+
+const Sale = require("../models/SaleModel");
+const Product = require("../models/ProductModel");
 const Customer = require("../models/CustomerModel");
 const SaleDetails = require("../models/SaleDetailsModel");
-const Sale = require("../models/SaleModel");
 
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
@@ -90,6 +92,14 @@ const createSale = async (req, res) => {
         })
         
         await SaleDetails.bulkCreate(detailsModel);
+
+        //Decrement stock on products
+        detailsModel.map( item => {
+            Product.findByPk(item.product_id)
+            .then(product => {
+                product.decrement('quantity', { by: item.quantity });
+            });
+        });
         
         res.json({ message: "Ok", sale });
     } catch (error) {
