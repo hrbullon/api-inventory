@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const User = require("../models/UserModel");
+const Company = require('../models/CompanyModel');
 
 const login = async (req, res) => {
 
@@ -13,6 +14,7 @@ const login = async (req, res) => {
     
         const user = await User.findOne({
             where: { account: body.account },
+            include: [ Company ],
             attributes: { exclude: ['createdAt','updatedAt'] }
         });
 

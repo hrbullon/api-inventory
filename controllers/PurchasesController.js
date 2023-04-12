@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const Product = require("../models/ProductModel");
 const PurchaseDetails = require("../models/PurchaseDetailsModel");
 const Purchase = require("../models/PurchaseModel");
@@ -24,15 +26,17 @@ const getPurchaseById = async (req, res) => {
 
 const createPurchase = async (req, res) => {
     try {
-
+        const token = req.headers.token;
         const details = req.body.purchase_details;
         
         delete req.body.code;
         delete req.body.purchase_details;
 
-        const model = { ...req.body };
+        //Decode token
+        const decodedToken = jwt.verify(token, process.env.JWT_SEED);
 
-        model.user_id = 1;
+        const model = { ...req.body };
+        model.user_id = decodedToken.user.id;
         model.state = "1";
         
         const purchase = await Purchase.create(model);

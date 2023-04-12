@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const moment = require("moment/moment");
 
 const Sale = require("../models/SaleModel");
@@ -73,14 +74,19 @@ const getSaleById = async (req, res) => {
 const createSale = async (req, res) => {
     try {
 
+        const token = req.headers.token;
+        
         const details = req.body.sale_details;
         
         delete req.body.sale_details;
         delete req.body.code;
         delete req.body.date;
 
+        //Decode token
+        const decodedToken = jwt.verify(token, process.env.JWT_SEED);
+
         const model = { ...req.body };
-        model.user_id = 1;
+        model.user_id = decodedToken.user.id;
         model.state = "1";
 
         const sale = await Sale.create(model);
