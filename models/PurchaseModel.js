@@ -8,7 +8,8 @@ class Purchase extends Model {
 }
 
 Purchase.init({ 
-      code: {
+      code: { type: DataTypes.STRING(10) },
+      document: {
         type: DataTypes.STRING(45),
         allowNull: false
       },
@@ -24,7 +25,15 @@ Purchase.init({
         type: DataTypes.INTEGER(),
         allowNull: false
       },
+      exchange_amount:{
+        type: DataTypes.DECIMAL(12,2),
+        allowNull: false
+      },
       total_amount: {
+        type: DataTypes.DECIMAL(12,2),
+        allowNull: false
+      },
+      total_amount_converted: {
         type: DataTypes.DECIMAL(12,2),
         allowNull: false
       },

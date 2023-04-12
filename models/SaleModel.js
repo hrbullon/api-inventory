@@ -43,6 +43,7 @@ Sale.init(
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
         },
+        state: { type: DataTypes.ENUM("0","1"), comment: "0->Inactive,1->Active" }
     },
     {
         sequelize,

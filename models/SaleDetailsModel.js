@@ -51,6 +51,14 @@ SaleDetails.init(
         subtotal_amount: {
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
+        },
+        price_converted: {
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: false
+        },
+        subtotal_amount_converted: {
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: false
         }
     },
     {

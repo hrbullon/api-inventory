@@ -1,8 +1,11 @@
+const PurchaseDetails = require("../models/PurchaseDetailsModel");
 const Purchase = require("../models/PurchaseModel");
 
 const getAllPurchases = async (req, res) => {
     try {
-        const purchases = await Purchase.findAll();
+        const purchases = await Purchase.findAll({
+            include: [ PurchaseDetails ]
+        });
         res.json({ message: "Ok", purchases });
     } catch (error) {
         res.json({ message: error.message });
@@ -20,8 +23,28 @@ const getPurchaseById = async (req, res) => {
 
 const createPurchase = async (req, res) => {
     try {
-        const purchase = await Purchase.create(req.body);
+
+        const details = req.body.purchase_details;
+        
+        delete req.body.code;
+        delete req.body.purchase_details;
+
+        const model = { ...req.body };
+
+        model.user_id = 1;
+        model.state = "1";
+        
+        const purchase = await Purchase.create(model);
+        const detailsModel = [];
+       
+        details.map( detail => {
+            const item = { purchase_id: purchase.id, ...detail  };
+            detailsModel.push(item);
+        })
+        
+        await PurchaseDetails.bulkCreate(detailsModel);
         res.status(201).json({ message: "Ok", purchase });
+
     } catch (error) {
         res.json({ message: error.message });
     }
