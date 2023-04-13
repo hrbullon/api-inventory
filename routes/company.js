@@ -10,9 +10,9 @@ const {
 let app = express(); 
 
 app.get('/companies', getAllCompanies);
-app.get('/company/:id', getCompanyById);
-app.post('/company', createCompany);
-app.put('/company/:id', updateCompany);
-app.delete('/company/:id', deleteCompany);
+app.get('/companies/:id', getCompanyById);
+app.post('/companies', createCompany);
+app.put('/companies/:id', updateCompany);
+app.delete('/companies/:id', deleteCompany);
 
 module.exports = app;
