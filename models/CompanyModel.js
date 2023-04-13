@@ -34,4 +34,24 @@ Company.init({
     tableName: 'companies'
 });
 
+sequelize.sync()
+.then(() => {
+    return Company.findOrCreate({
+        where: { id: 1 },
+        defaults: {
+            name:"My Company",
+            legal_name:"Legal Name",
+            dni:"V20000000",
+            address:"My address",
+            email:"mail@domain.com",
+            phone:"12345678910",
+            web:"www.exxample.com"
+        }
+    });
+}).then(([record, created]) => {
+    console.log(record.get({
+    plain: true
+}))
+    console.log(created) })
+
 module.exports = Company

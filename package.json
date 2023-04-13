@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
+    "electron": "electron server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -21,6 +22,7 @@
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
+    "electron": "^24.1.1",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "mime-types": "^2.1.35",
