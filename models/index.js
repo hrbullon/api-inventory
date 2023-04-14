@@ -29,4 +29,30 @@ db.Sequelize = Sequelize;
 
 sequelize.sync(); // update database on case on changes
 
+//Create Triggers
+sequelize.query("DROP TRIGGER IF EXISTS BEFORE_INSERT_SALES");
+sequelize.query("DROP TRIGGER IF EXISTS BEFORE_INSERT_PURCHASES");
+
+sequelize.query(`
+CREATE TRIGGER BEFORE_INSERT_SALES
+BEFORE INSERT ON sales
+FOR EACH ROW
+BEGIN
+  DECLARE next_id INT;
+  SET next_id = (SELECT COUNT(id) FROM sales);
+  SET NEW.code = LPAD((next_id+1), 6, '0');
+END;
+`);
+
+sequelize.query(`
+CREATE TRIGGER BEFORE_INSERT_PURCHASES
+BEFORE INSERT ON purchases
+FOR EACH ROW
+BEGIN
+  DECLARE next_id INT;
+  SET next_id = (SELECT COUNT(id) FROM purchases);
+  SET NEW.code = LPAD((next_id+1), 6, '0');
+END;
+`);
+
 module.exports = db;

@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 const User = require("../models/UserModel");
@@ -26,8 +27,17 @@ const getUserById = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
+
+        const token = req.headers.token;
+
+        //Decode token
+        const decodedToken = jwt.verify(token, process.env.JWT_SEED);
+
         const { password } = req.body;
         const model = req.body;
+
+        model.state = "1";
+        model.company_id = decodedToken.user.company_id;
         model.password = bcrypt.hashSync(password, 10);
 
         const user = await User.create(model);

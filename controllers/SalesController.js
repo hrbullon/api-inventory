@@ -82,10 +82,14 @@ const createSale = async (req, res) => {
         delete req.body.code;
         delete req.body.date;
 
+        //Get Date
+        const date = moment().format("YYYY-MM-DD");
+
         //Decode token
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
 
         const model = { ...req.body };
+        model.date = date;
         model.user_id = decodedToken.user.id;
         model.state = "1";
 
