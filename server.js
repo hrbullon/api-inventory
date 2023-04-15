@@ -1,10 +1,7 @@
-const { app, BrowserWindow } = require('electron');
 const express = require('express');
 const path = require('path');
 
 require('dotenv').config();
-
-let mainWindow
 
 const appExpress = express();
 
@@ -47,33 +44,6 @@ appExpress.get('/', (req, res) => {
 //Database Connection and Syncronize all models
 require('./models/index'); 
 
-function createWindow() {
-    mainWindow = new BrowserWindow({
-      width: 800,
-      height: 600
-    })
-  
-    // Carga la aplicación web de Node.js y Express en la ventana de navegador de Electron
-    mainWindow.loadURL('http://localhost:8000')
-  
-    mainWindow.on('closed', function () {
-      mainWindow = null
-    })
-}
-
 server.listen(process.env.PORT, () => {
-
-    if(app){
-        app.whenReady().then(createWindow)
-    
-        app.on('window-all-closed', function () {
-            if (process.platform !== 'darwin') app.quit()
-        })
-    
-        app.on('activate', function () {
-            if (mainWindow === null) createWindow()
-        })
-    }
-
     console.log('Listen on: ', process.env.PORT);
 });

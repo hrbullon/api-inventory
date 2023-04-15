@@ -14,6 +14,7 @@ const getAllSales = async (req, res) => {
         if(!req.params.details){
             const sales = await Sale.findAll(
                 { 
+                    attributes: { exclude: [ 'createdAt', 'updatedAt' ]},
                     include: [Customer, SaleDetails],
                     order: [ [ 'createdAt', 'DESC' ]]
                 }
@@ -104,12 +105,7 @@ const createSale = async (req, res) => {
         await SaleDetails.bulkCreate(detailsModel);
 
         //Decrement stock on products
-        detailsModel.map( item => {
-            Product.findByPk(item.product_id)
-            .then(product => {
-                product.decrement('quantity', { by: item.quantity });
-            });
-        });
+        updateDetails(detailsModel, "decrement");
         
         res.json({ message: "Ok", sale });
     } catch (error) {
@@ -117,39 +113,40 @@ const createSale = async (req, res) => {
     }
 }
 
-const updateSale = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const details = req.body.sale_details;
+const updateDetails = (items, type) => {
+    items.map( item => {
+        Product.findByPk(item.product_id)
+        .then(product => {
+            if(type == "increment"){
+                product.increment('quantity', { by: item.quantity });
+            }
 
-        delete req.body.sale_details;
-        const model = { ...req.body };
-
-        const sale = await Sale.update(model, { where: { id:id }});
-        await SaleDetails.destroy({ where: { sale_id:id }});
-
-        const detailsModel = [];
-       
-        details.map( detail => {
-            const item = { sale_id: req.params.id, ...detail  };
-            detailsModel.push(item);
-        })
-        
-        await SaleDetails.bulkCreate(detailsModel);
-
-        res.json({ message: "Ok", sale });
-    } catch (error) {
-        res.json({ message: error.message });
-    }
+            if(type == "decrement"){
+                product.decrement('quantity', { by: item.quantity });
+            }
+        });
+    });
 }
 
 const deleteSale = async (req, res) => {
     try {
-        const sale = await Sale.destroy({
-            where: {
-              id: req.params.id
-            }
+        
+        const { id } = req.params;
+        
+        let sale = await Sale.findByPk(id,{
+            include: [ SaleDetails ]
         });
+
+        if(sale){
+            //Decrement stock on products
+            updateDetails(sale.SaleDetails, "increment");
+
+            //Chage state of sale
+            sale = await Sale.update({ state: "0"}, { where: { id }});
+        }else{
+            return res.status(404).json({ message: "Error - Venta no encontrada" });
+        }
+
         res.json({ message: "Ok", sale });
     } catch (error) {
         res.json({ message: error.message });
@@ -161,6 +158,5 @@ module.exports = {
     getAllSales,
     getSaleById,
     createSale,
-    updateSale,
     deleteSale
 }

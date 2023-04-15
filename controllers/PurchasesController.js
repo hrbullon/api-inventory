@@ -48,14 +48,8 @@ const createPurchase = async (req, res) => {
         })
         
         await PurchaseDetails.bulkCreate(detailsModel);
-
         //Increment stock on products
-        detailsModel.map( item => {
-            Product.findByPk(item.product_id)
-            .then(product => {
-                product.increment('quantity', { by: item.quantity });
-            });
-        });
+        updateDetails(detailsModel, "increment");
 
         res.status(201).json({ message: "Ok", purchase });
 
@@ -64,28 +58,39 @@ const createPurchase = async (req, res) => {
     }
 }
 
-const updatePurchase = async (req, res) => {
-    try {
-        const purchase = await Purchase.update(req.body, {
-            where: {
-              id: req.params.id
+const updateDetails = (items, type) => {
+    items.map( item => {
+        Product.findByPk(item.product_id)
+        .then(product => {
+            if(type == "increment"){
+                product.increment('quantity', { by: item.quantity });
+            }
+
+            if(type == "decrement"){
+                product.decrement('quantity', { by: item.quantity });
             }
         });
-        res.json({ message: "Ok", purchase });
-    } catch (error) {
-        res.json({ message: error.message });
-    }
+    });
 }
 
 const deletePurchase = async (req, res) => {
     try {
-        const purchase = await Purchase.update({
-            state: req.params.action
-        }, {
-            where: {
-              id: req.params.id
-            }
+        const { id } = req.params;
+        
+        let purchase = await Purchase.findByPk(id,{
+            include: [ PurchaseDetails ]
         });
+
+        if(purchase){
+            //Decrement stock on products
+            updateDetails(purchase.PurchaseDetails, "decrement");
+
+            //Chage state of purchase
+            purchase = await Purchase.update({ state: "0"}, { where: { id }});
+        }else{
+            return res.status(404).json({ message: "Error - Compra no encontrada" });
+        }
+
         res.json({ message: "Ok", purchase });
     } catch (error) {
         res.json({ message: error.message });
@@ -96,7 +101,6 @@ const deletePurchase = async (req, res) => {
 module.exports = {
     getPurchaseById,
     createPurchase,
-    updatePurchase,
     getAllPurchases,
     deletePurchase
 }
