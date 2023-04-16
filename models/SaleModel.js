@@ -1,5 +1,5 @@
 const sequelize = require("../database/db.js");
-const { Sequelize, DataTypes, Model } = require("sequelize");
+const { DataTypes, Model } = require("sequelize");
 
 const Customer = require("./CustomerModel.js");
 
@@ -16,6 +16,7 @@ Sale.init(
         date: { 
             type: DataTypes.DATEONLY(),
         },
+        description: { type: DataTypes.STRING(300) },
         customer_id: {
             type: DataTypes.INTEGER(),
             allowNull: false,
