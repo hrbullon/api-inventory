@@ -49,22 +49,33 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     try {
-
+        
+        const { id } = req.params;
         const { password } = req.body;
         const model = req.body;
         
-        if(password !== ""){
-            model.password = bcrypt.hashSync(password, 10);
+        let user = User.findByPk(id);
+
+        if(user){
+            if(password !== ""){
+                model.password = bcrypt.hashSync(password, 10);
+            }else{
+                delete model.password;
+            }
+
+            model.state = model.state.toString();
+
+            user = await User.update(model, {
+                where: {
+                  id: req.params.id
+                }
+            });
+
+            return res.json({ message: "Ok", user });
         }else{
-            delete model.password;
+            return res.status(404).json({ message: "Error - Usuario no encontrado" });
         }
 
-        const user = await User.update(model, {
-            where: {
-              id: req.params.id
-            }
-        });
-        res.json({ message: "Ok", user });
     } catch (error) {
         res.json({ message: error.message });
     }
@@ -73,7 +84,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
     try {
         const user = await User.update({
-            state: req.params.action
+            state: req.params.action.toString()
         }, {
             where: {
               id: req.params.id
