@@ -48,6 +48,7 @@ PurchaseDetails.init(
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
         },
+        salePrice: { type: DataTypes.DECIMAL(12,2) },
         subtotal_amount: {
             type: DataTypes.DECIMAL(12,2),
             allowNull: false

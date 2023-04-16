@@ -69,6 +69,11 @@ const updateDetails = (items, type) => {
             if(type == "decrement"){
                 product.decrement('quantity', { by: item.quantity });
             }
+            
+            if(item.salePrice !== "" && product.price !== item.salePrice){
+                product.price = item.salePrice;
+                product.save();
+            }
         });
     });
 }
