@@ -15,7 +15,10 @@ Product.init({
         allowNull: false
     },
     description: { type: DataTypes.STRING(300) },
-    category_id: { type: DataTypes.INTEGER() },
+    category_id: { 
+        type: DataTypes.INTEGER(),
+        defaultValue: 0
+    },
     brand: { type: DataTypes.STRING(45) },
     model: { type: DataTypes.STRING(45) },
     price: {

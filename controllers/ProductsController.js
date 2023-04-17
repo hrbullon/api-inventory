@@ -6,7 +6,9 @@ require('dotenv').config();
 
 const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.findAll();
+        const products = await Product.findAll({
+            order: [['name', 'ASC']]
+        });
         res.json({ message: "Ok", products });
     } catch (error) {
         res.json({ message: error.message });
@@ -37,7 +39,15 @@ const createProduct = async (req, res) => {
                 model.image = `${process.env.BASE_URL}/images/${uploadedFile.fileName}`
             }
         }else{
-            delete model.image;
+            model.image = "https://placehold.co/400";
+        }
+
+        if(model.category_id == ""){
+            model.category_id = 0;
+        }
+        
+        if(model.code == ""){
+            model.code = "S/I";
         }
 
         const product = await Product.create(model);
@@ -50,7 +60,6 @@ const createProduct = async (req, res) => {
 
 const updateProduct = async (req, res) => {
     try {
-
         const model = req.body;
         
         //Is there file
@@ -62,6 +71,14 @@ const updateProduct = async (req, res) => {
             }
         }else{
             delete model.image;
+        }
+
+        if(model.category_id == ""){
+            model.category_id = 0;
+        }
+        
+        if(model.code == ""){
+            model.code = "S/I";
         }
         
         const product = await Product.update(req.body, {
