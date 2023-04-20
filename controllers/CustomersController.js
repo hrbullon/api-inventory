@@ -2,7 +2,9 @@ const Customer = require("../models/CustomerModel");
 
 const getAllCustomers = async (req, res) => {
     try {
-        const customers = await Customer.findAll();
+        const customers = await Customer.findAll({
+            attributes: ['id','dni','name','phone','email','address']
+        });
         res.json({ message: "Ok", customers });
     } catch (error) {
         res.json({ message: error.message });
