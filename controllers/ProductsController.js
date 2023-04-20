@@ -7,7 +7,8 @@ require('dotenv').config();
 const getAllProducts = async (req, res) => {
     try {
         const products = await Product.findAll({
-            order: [['name', 'ASC']]
+            order: [['name', 'ASC']],
+            attributes: ['id','code','name','quantity','price']
         });
         res.json({ message: "Ok", products });
     } catch (error) {
