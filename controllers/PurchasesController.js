@@ -7,6 +7,7 @@ const Purchase = require("../models/PurchaseModel");
 const getAllPurchases = async (req, res) => {
     try {
         const purchases = await Purchase.findAll({
+            attributes: { exclude: [ 'createdAt', 'updatedAt' ]},
             include: [ PurchaseDetails ]
         });
         res.json({ message: "Ok", purchases });
