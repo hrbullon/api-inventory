@@ -1,8 +1,13 @@
+const { Op } = require('sequelize');
 const Category = require("../models/CategoryModel");
 
 const getAllCategories = async (req, res) => {
     try {
-        const categories = await Category.findAll();
+
+        const search = req.query.search;
+        const condition = search? { name: { [Op.like]: `%${search}%` } } : null;
+        const categories = await Category.findAll({ where: condition, order: [ [ 'id', 'DESC' ]] });
+        
         res.json({ message: "Ok", categories });
     } catch (error) {
         res.json({ message: error.message });
