@@ -1,10 +1,27 @@
+const { Op } = require('sequelize');
 const Customer = require("../models/CustomerModel");
 
 const getAllCustomers = async (req, res) => {
     try {
+
+        let condition = null;
+        let { dni, name, phone, email } = req.query;
+        
+        if(Object.entries(req.query).length > 0 ){
+            condition = { 
+                dni: { [Op.like]: `%${dni}%` },
+                name: { [Op.like]: `%${name}%` }, 
+                phone: { [Op.like]: `%${phone}%` },
+                email: { [Op.like]: `%${email}%` },
+            };
+        }
+
         const customers = await Customer.findAll({
-            attributes: ['id','dni','name','phone','email','address']
+            where: condition,
+            attributes: ['id','dni','name','phone','email','address'],
+            order: [ [ 'id', 'DESC' ]]
         });
+
         res.json({ message: "Ok", customers });
     } catch (error) {
         res.json({ message: error.message });
