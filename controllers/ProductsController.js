@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 const Product = require("../models/ProductModel");
 const filterFileType = require("../utils/utils");
 const Category = require("../models/CategoryModel");
@@ -6,10 +8,29 @@ require('dotenv').config();
 
 const getAllProducts = async (req, res) => {
     try {
+
+        let condition = null;
+        let { search } = req.query;
+
+        if(Object.entries(req.query).length > 0 ){
+            condition = { 
+                [Op.or]: [
+                    { name: { [Op.like]: `%${search}%` } },
+                    { code: { [Op.like]: `%${search}%` } },
+                    { description: { [Op.like]: `%${search}%` } },
+                    { price: { [Op.like]: `%${search}%` } },
+                    { brand: { [Op.like]: `%${search}%` } },
+                    { model: { [Op.like]: `%${search}%` } }
+                ]
+            }
+        }    
+
         const products = await Product.findAll({
+            where: condition,
             order: [['name', 'ASC']],
-            attributes: ['id','code','name','quantity','price']
+            attributes: ['id','code','name','quantity','price','image']
         });
+
         res.json({ message: "Ok", products });
     } catch (error) {
         res.json({ message: error.message });
