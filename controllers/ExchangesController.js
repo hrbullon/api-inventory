@@ -1,8 +1,24 @@
+const { Op } = require('sequelize');
 const Exchange = require("../models/ExchangeModel");
 
 const getAllExchanges = async (req, res) => {
     try {
+
+        let condition = null;
+        let { search, date } = req.query;
+
+        if(Object.entries(req.query).length > 0 ){
+           condition = {
+                date: (date)? date : { [Op.gte]:0 },
+                [Op.or]: [
+                    { description: { [Op.substring]: search } }, //filter by description
+                    { amount: { [Op.substring]: search } } //filter by amount
+                ]
+           }
+        }
+
         const exchanges = await Exchange.findAll({
+            where: condition,
             order: [ [ 'date', 'DESC' ]],
             limit: req.params.limit? parseInt(req.params.limit) : null
         });
