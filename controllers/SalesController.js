@@ -6,16 +6,13 @@ const ProductRepository = require('../repositories/ProductRepository');
 
 const getAllSales = async (req, res) => {
     try {
-
         let sales = null;
-
         if(!req.params.details){
             sales = await SaleRepository.findAll(req);
-        }else{ 
+        }else{
             sales = await SaleRepository.findAllDetails(req);
         }
-
-        res.json({ message: "Ok", sales });
+        return res.json({ message: "Ok", sales });
     } catch (error) {
         res.json({ message: error.message });
     }

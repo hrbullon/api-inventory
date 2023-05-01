@@ -21,8 +21,6 @@ class SaleRepository {
         let today = moment().format("YYYY-MM-DD");
         let { code, customer, start_date, end_date } = req.query;
             
-        console.log(req.query);
-
         if(Object.entries(req.query).length > 0){
             
             condition = {
@@ -57,15 +55,20 @@ class SaleRepository {
     static async findAllDetails(req) { 
         
         let condition;
-        let { details } = req.params;
-
-        condition = this.getCondition(details);
+        let { code, product } = req.query;
+        condition = this.getCondition(req);
 
         const sales = await SaleDetails.findAll({
-           include: [ {
-            model: Sale,
-            where: condition
-           }],
+            where: {
+                code: { [Op.like] : `%${code}%` },
+                description: { [Op.like] : `%${product}%` }
+            },
+            include: [ 
+                {
+                    model: Sale,
+                    where: condition
+                }
+            ],
         });
 
         return sales;
@@ -93,14 +96,19 @@ class SaleRepository {
         return await Sale.update({ state: "0"}, { where: { id }});
     }
 
-    static getCondition(type) {
+    static getCondition(req) {
     
         let condition = null;
+        let { details } = req.params;
+        let { sale_code } = req.query;
         let today = moment().format("YYYY-MM-DD");
     
-        switch (type) {
+        switch (details) {
             case "today":
-                condition = { date: today }
+                condition = {
+                    code: { [Op.like]: `%${sale_code}%` }, 
+                    date: today 
+                }
             break;
             
             case "month":
@@ -109,6 +117,7 @@ class SaleRepository {
                 const month = new Date().getMonth() + 1;
     
                 condition = {
+                    code: { [Op.like]: `%${sale_code}%` },
                     date: {
                         [Op.and]: [
                             { [Op.gte]: new Date(year, month - 1, 1) }, // Start of current month
