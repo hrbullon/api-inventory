@@ -1,61 +1,21 @@
 const jwt = require('jsonwebtoken');
-const moment = require("moment/moment");
 
-const Sale = require("../models/SaleModel");
-const Product = require("../models/ProductModel");
-const Customer = require("../models/CustomerModel");
-const SaleDetails = require("../models/SaleDetailsModel");
-
-const Sequelize = require('sequelize');
-const Op = Sequelize.Op;
+//Repositroy
+const SaleRepository = require('../repositories/SaleRepository');
+const ProductRepository = require('../repositories/ProductRepository');
 
 const getAllSales = async (req, res) => {
     try {
+
+        let sales = null;
+
         if(!req.params.details){
-            const sales = await Sale.findAll(
-                { 
-                    attributes: { exclude: [ 'createdAt', 'updatedAt' ]},
-                    include: [Customer, SaleDetails],
-                    order: [ [ 'createdAt', 'DESC' ]]
-                }
-            );
-            res.json({ message: "Ok", sales });
-        }else{
-
-            let condition;
-
-            if(req.params.details == "month"){
-
-                // Get the current year and month
-                const year = new Date().getFullYear();
-                const month = new Date().getMonth() + 1;
-
-                condition = {
-                    date: {
-                        [Op.and]: [
-                            { [Op.gte]: new Date(year, month - 1, 1) }, // Start of current month
-                            { [Op.lt]: new Date(year, month, 1) } // Start of next month
-                        ]
-                    }
-                }
-
-            }
-
-            if(req.params.details == "today"){
-                const date = moment().format("YYYY-MM-DD");
-                condition = { date: date }
-            }
-
-            const sales = await SaleDetails.findAll({
-               include: [ {
-                model: Sale,
-                where: condition
-               }],
-            });
-
-            res.json({ message: "Ok", sales });
+            sales = await SaleRepository.findAll(req);
+        }else{ 
+            sales = await SaleRepository.findAllDetails(req);
         }
-        
+
+        res.json({ message: "Ok", sales });
     } catch (error) {
         res.json({ message: error.message });
     }
@@ -63,9 +23,7 @@ const getAllSales = async (req, res) => {
 
 const getSaleById = async (req, res) => {
     try {
-        const sale = await Sale.findByPk(req.params.id,
-            { include: [Customer, SaleDetails] }
-        );
+        const sale = await SaleRepository.findByPk(req.params.id);
         res.json({ message: "Ok", sale });
     } catch (error) {
         res.json({ message: error.message });
@@ -75,37 +33,22 @@ const getSaleById = async (req, res) => {
 const createSale = async (req, res) => {
     try {
 
+        //Getting Headers and Body
         const token = req.headers.token;
-        
-        const details = req.body.sale_details;
-        
-        delete req.body.sale_details;
-        delete req.body.code;
-        delete req.body.date;
-
-        //Get Date
-        const date = moment().format("YYYY-MM-DD");
 
         //Decode token
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
 
-        const model = { ...req.body };
-        model.date = date;
-        model.user_id = decodedToken.user.id;
-        model.state = "1";
+        //Getting details
+        const details = req.body.sale_details;
 
-        const sale = await Sale.create(model);
-        const detailsModel = [];
-       
-        details.map( detail => {
-            const item = { sale_id: sale.id, ...detail  };
-            detailsModel.push(item);
-        })
-        
-        await SaleDetails.bulkCreate(detailsModel);
+        let sale = await SaleRepository.create(req, decodedToken.user.id);
+        let added = await SaleRepository.createDetails(sale, details);
 
-        //Decrement stock on products
-        updateDetails(detailsModel, "decrement");
+        if(added){
+            //Decrement stock on products
+            await ProductRepository.updateDetails(details, "decrement");
+        }
         
         res.json({ message: "Ok", sale });
     } catch (error) {
@@ -113,36 +56,18 @@ const createSale = async (req, res) => {
     }
 }
 
-const updateDetails = (items, type) => {
-    items.map( item => {
-        Product.findByPk(item.product_id)
-        .then(product => {
-            if(type == "increment"){
-                product.increment('quantity', { by: item.quantity });
-            }
-
-            if(type == "decrement"){
-                product.decrement('quantity', { by: item.quantity });
-            }
-        });
-    });
-}
-
 const deleteSale = async (req, res) => {
     try {
-        
         const { id } = req.params;
         
-        let sale = await Sale.findByPk(id,{
-            include: [ SaleDetails ]
-        });
+        let sale = await SaleRepository.findByPk(id);
 
         if(sale){
             //Decrement stock on products
-            updateDetails(sale.SaleDetails, "increment");
+            await ProductRepository.updateDetails(sale.SaleDetails, "increment");
 
             //Chage state of sale
-            sale = await Sale.update({ state: "0"}, { where: { id }});
+            sale = await SaleRepository.changeState(id);
         }else{
             return res.status(404).json({ message: "Error - Venta no encontrada" });
         }
