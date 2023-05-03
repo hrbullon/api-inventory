@@ -2,12 +2,11 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 const User = require("../models/UserModel");
+const UserRepository = require('../repositories/UserRepository');
 
 const getAllUsers = async (req, res) => {
     try {
-        const users = await User.findAll({
-            attributes: ['id','dni','firstname','lastname','account','state']
-        });
+        const users = await UserRepository.findAll(req);
         res.json({ message: "Ok", users });
     } catch (error) {
         res.json({ message: error.message });
@@ -16,9 +15,7 @@ const getAllUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
     try {
-        const user = await User.findByPk(req.params.id,{
-            attributes: { exclude: ['password','createdAt','updatedAt'] }
-        });
+        const user = await UserRepository.findByPk(req.params.id); 
         res.json({ message: "Ok", user });
     } catch (error) {
         res.json({ message: error.message });
