@@ -1,9 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-const Product = require("../models/ProductModel");
-const Purchase = require("../models/PurchaseModel");
-const PurchaseDetails = require("../models/PurchaseDetailsModel");
-
 const ProductRepository = require('../repositories/ProductRepository');
 const PurchaseRepository = require('../repositories/PurchaseRepository');
 
@@ -51,40 +47,19 @@ const createPurchase = async (req, res) => {
     }
 }
 
-const updateDetails = (items, type) => {
-    items.map( item => {
-        Product.findByPk(item.product_id)
-        .then(product => {
-            if(type == "increment"){
-                product.increment('quantity', { by: item.quantity });
-            }
-
-            if(type == "decrement"){
-                product.decrement('quantity', { by: item.quantity });
-            }
-            
-            if(item.salePrice !== "" && product.price !== item.salePrice){
-                product.price = item.salePrice;
-                product.save();
-            }
-        });
-    });
-}
-
 const deletePurchase = async (req, res) => {
     try {
         const { id } = req.params;
         
-        let purchase = await Purchase.findByPk(id,{
-            include: [ PurchaseDetails ]
-        });
+        let purchase = await PurchaseRepository.findByPk(id);
 
         if(purchase){
             //Decrement stock on products
-            updateDetails(purchase.PurchaseDetails, "decrement");
+            await ProductRepository.updateDetails(purchase.PurchaseDetails, "decrement");
 
             //Chage state of purchase
-            purchase = await Purchase.update({ state: "0"}, { where: { id }});
+            purchase.state = "0";
+            purchase.save();
         }else{
             return res.status(404).json({ message: "Error - Compra no encontrada" });
         }
@@ -94,7 +69,6 @@ const deletePurchase = async (req, res) => {
         res.json({ message: error.message });
     }
 }
-
 
 module.exports = {
     getPurchaseById,

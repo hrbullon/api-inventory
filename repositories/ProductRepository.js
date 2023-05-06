@@ -8,6 +8,11 @@ class ProductRepository {
             .then(product => {
                 if(type == "increment"){
                     product.increment('quantity', { by: item.quantity });
+
+                    if(item.salePrice !== "" && product.price !== item.salePrice){
+                        product.price = item.salePrice;
+                        product.save();
+                    }
                 }
     
                 if(type == "decrement"){
