@@ -3,13 +3,11 @@ const jwt = require('jsonwebtoken');
 const Product = require("../models/ProductModel");
 const PurchaseDetails = require("../models/PurchaseDetailsModel");
 const Purchase = require("../models/PurchaseModel");
+const PurchaseRepository = require('../repositories/PurchaseRepository');
 
 const getAllPurchases = async (req, res) => {
     try {
-        const purchases = await Purchase.findAll({
-            attributes: { exclude: [ 'createdAt', 'updatedAt' ]},
-            include: [ PurchaseDetails ]
-        });
+        const purchases = await PurchaseRepository.findAll(req);
         res.json({ message: "Ok", purchases });
     } catch (error) {
         res.json({ message: error.message });
@@ -18,7 +16,7 @@ const getAllPurchases = async (req, res) => {
 
 const getPurchaseById = async (req, res) => {
     try {
-        const purchase = await Purchase.findByPk(req.params.id);
+        const purchase = await PurchaseRepository.findByPk(req.params.id);
         res.json({ message: "Ok", purchase });
     } catch (error) {
         res.json({ message: error.message });
@@ -27,31 +25,23 @@ const getPurchaseById = async (req, res) => {
 
 const createPurchase = async (req, res) => {
     try {
+
+        //Getting Headers and Body
         const token = req.headers.token;
-        const details = req.body.purchase_details;
-        
-        delete req.body.code;
-        delete req.body.purchase_details;
 
         //Decode token
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
 
-        const model = { ...req.body };
-        model.user_id = decodedToken.user.id;
-        model.state = "1";
-        
-        const purchase = await Purchase.create(model);
-        const detailsModel = [];
-       
-        details.map( detail => {
-            const item = { purchase_id: purchase.id, ...detail  };
-            detailsModel.push(item);
-        })
-        
-        await PurchaseDetails.bulkCreate(detailsModel);
-        //Increment stock on products
-        updateDetails(detailsModel, "increment");
+        //Getting details
+        const details = req.body.purchase_details;
 
+        let purchase = await PurchaseRepository.create(req, decodedToken.user.id);
+        let added = await PurchaseRepository.createDetails(purchase, details);
+
+        if(added){
+            //Increment stock on products
+            await ProductRepository.updateDetails(details, "increment");
+        }
         res.status(201).json({ message: "Ok", purchase });
 
     } catch (error) {
