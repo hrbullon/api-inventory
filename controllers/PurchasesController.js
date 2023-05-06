@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken');
 
 const Product = require("../models/ProductModel");
-const PurchaseDetails = require("../models/PurchaseDetailsModel");
 const Purchase = require("../models/PurchaseModel");
+const PurchaseDetails = require("../models/PurchaseDetailsModel");
+
+const ProductRepository = require('../repositories/ProductRepository');
 const PurchaseRepository = require('../repositories/PurchaseRepository');
 
 const getAllPurchases = async (req, res) => {
