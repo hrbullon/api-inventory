@@ -1,27 +1,10 @@
 const { Op } = require('sequelize');
 const Exchange = require("../models/ExchangeModel");
+const ExchangeRepository = require('../repositories/ExchangeRepository');
 
 const getAllExchanges = async (req, res) => {
     try {
-
-        let condition = null;
-        let { search, date } = req.query;
-
-        if(Object.entries(req.query).length > 0 ){
-           condition = {
-                date: (date)? date : { [Op.gte]:0 },
-                [Op.or]: [
-                    { description: { [Op.substring]: search } }, //filter by description
-                    { amount: { [Op.substring]: search } } //filter by amount
-                ]
-           }
-        }
-
-        const exchanges = await Exchange.findAll({
-            where: condition,
-            order: [ [ 'date', 'DESC' ]],
-            limit: req.params.limit? parseInt(req.params.limit) : null
-        });
+        const exchanges = await ExchangeRepository.findAll(req);
         res.json({ message: "Ok", exchanges });
     } catch (error) {
         res.json({ message: error.message });
@@ -30,7 +13,7 @@ const getAllExchanges = async (req, res) => {
 
 const getExchangeById = async (req, res) => {
     try {
-        const exchange = await Exchange.findByPk(req.params.id);
+        const exchange = await ExchangeRepository.findByPk(req.params.id);
         res.json({ message: "Ok", exchange });
     } catch (error) {
         res.json({ message: error.message });
@@ -39,8 +22,8 @@ const getExchangeById = async (req, res) => {
 
 const createExchange = async (req, res) => {
     try {
-        const exchange = await Exchange.create(req.body);
-        res.json({ message: "Ok", exchange });
+        const exchange = await ExchangeRepository.save(req);
+        res.status(201).json({ message: "Ok", exchange });
     } catch (error) {
         res.json({ message: error.message });
     }
@@ -48,11 +31,7 @@ const createExchange = async (req, res) => {
 
 const updateExchange = async (req, res) => {
     try {
-        const exchange = await Exchange.update(req.body, {
-            where: {
-              id: req.params.id
-            }
-        });
+        const exchange = await ExchangeRepository.save(req, req.params.id);
         res.json({ message: "Ok", exchange });
     } catch (error) {
         res.json({ message: error.message });
@@ -61,17 +40,12 @@ const updateExchange = async (req, res) => {
 
 const deleteExchange = async (req, res) => {
     try {
-        const exchange = await Exchange.destroy({
-            where: {
-              id: req.params.id
-            }
-        });
+        const exchange = await ExchangeRepository.destroy(req.params.id);
         res.json({ message: "Ok", exchange });
     } catch (error) {
         res.json({ message: error.message });
     }
 }
-
 
 module.exports = {
     getExchangeById,
