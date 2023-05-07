@@ -64,6 +64,7 @@ class ProductRepository {
     static async create(req){
         
         const model = req.body;
+        model.state = "1";
 
         //Is there file
         if(req.file !== undefined){

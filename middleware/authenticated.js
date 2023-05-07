@@ -28,13 +28,10 @@ let verifyAdminRole = (req, res, next) => {
 
     let user = req.user;
 
-    console.log("=====");
-    console.log(user);
-
     if (user.role === 'ADM_ROLE') {
         next();
     } else {
-        return res.json({ message: 'El usuario no tiene permisos' });
+        return res.status(401).json({ error: 'Acción no permitida, intente más tarde' });
     }
 };
 
