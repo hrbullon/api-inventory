@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 
 const User = require("../models/UserModel");
 const UserRepository = require('../repositories/UserRepository');
@@ -16,9 +15,17 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
     try {
         const user = await UserRepository.findByPk(req.params.id); 
-        res.json({ message: "Ok", user });
+
+        if(user){
+            res.json({ message: "Ok", user });
+        }else{
+            res.status(404).json({
+                message: "No found",
+                user: null
+            });
+        }
     } catch (error) {
-        res.json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -26,19 +33,10 @@ const createUser = async (req, res) => {
     try {
 
         const token = req.headers.token;
-
         //Decode token
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
-
-        const { password } = req.body;
-        const model = req.body;
-
-        model.state = "1";
-        model.company_id = decodedToken.user.company_id;
-        model.password = bcrypt.hashSync(password, 10);
-
-        const user = await User.create(model);
-        res.json({ message: "Ok", user });
+        const user = await UserRepository.create(req, decodedToken);
+        res.status(201).json({ message: "Ok", user });
     } catch (error) {
         res.json({ message: error.message });
     }
@@ -48,26 +46,10 @@ const updateUser = async (req, res) => {
     try {
         
         const { id } = req.params;
-        const { password } = req.body;
-        const model = req.body;
-        
         let user = User.findByPk(id);
 
         if(user){
-            if(password !== ""){
-                model.password = bcrypt.hashSync(password, 10);
-            }else{
-                delete model.password;
-            }
-
-            model.state = model.state.toString();
-
-            user = await User.update(model, {
-                where: {
-                  id: req.params.id
-                }
-            });
-
+            const user = await UserRepository.update(req, id);
             return res.json({ message: "Ok", user });
         }else{
             return res.status(404).json({ message: "Error - Usuario no encontrado" });
@@ -80,13 +62,12 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
     try {
+        const { id, action } = req.params;
+
         const user = await User.update({
-            state: req.params.action.toString()
-        }, {
-            where: {
-              id: req.params.id
-            }
-        });
+            state: action.toString()
+        }, { where: { id: id } });
+
         res.json({ message: "Ok", user });
     } catch (error) {
         res.json({ message: error.message });
