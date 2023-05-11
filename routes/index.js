@@ -11,6 +11,8 @@ app.use( require('./product') );
 app.use( require('./user') );
 app.use( require('./sale') );
 app.use( require('./purchase') );
+app.use( require('./checkout') );
+app.use( require('./transaction') );
 app.use( require('./payment_methods') );
 
 module.exports = app;
