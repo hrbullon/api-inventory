@@ -25,4 +25,30 @@ Transaction.init({
     tableName: 'transactions'
 });
 
+sequelize.sync()
+.then(() => {
+
+  const transactions = [
+    {
+      name: "CHECKOUT_OPEN",
+      description: "Abrir caja"
+    },
+    {
+      name: "CHECKOUT_CLOSE",
+      description: "Cerrar caja"
+    },
+    {
+      name: "CHECKOUT_IN_CASH",
+      description: "Ingreso de efectivo"
+    },
+    {
+      name: "CHECKOUT_OUT_CASH",
+      description: "Retiro de efectivo"
+    }
+  ];
+
+  return Transaction.bulkCreate(transactions);
+
+});
+
 module.exports = Transaction
