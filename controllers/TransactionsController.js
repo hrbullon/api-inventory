@@ -18,7 +18,18 @@ const createTransaction = async (req, res) => {
     }
 } 
 
+const checkStartedTransaction = async (req, res) => {
+    try {
+        let { checkoutId } = req.params;
+        const transaction = await TransactionRepository.checkStartedTransaction(checkoutId);
+        res.json({ message: "Ok", transaction });
+    } catch (error) {
+        res.json({ message: error.message });
+    }
+} 
+
 module.exports = { 
     createTransaction,
-    getAllTransactionByCheckout
+    getAllTransactionByCheckout,
+    checkStartedTransaction
 }
