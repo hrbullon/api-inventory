@@ -12,7 +12,8 @@ Transaction.init({
     // Model attributes are defined here
     name: {
       type: DataTypes.STRING(45),
-      allowNull: false
+      allowNull: false,
+      unique: true
     },
     description: {
       type: DataTypes.STRING(45),
@@ -47,7 +48,7 @@ sequelize.sync()
     }
   ];
 
-  return Transaction.bulkCreate(transactions);
+  return Transaction.bulkCreate(transactions, { ignoreDuplicates: true });
 
 });
 
