@@ -31,6 +31,10 @@ Sale.init(
             type: DataTypes.INTEGER(),
             allowNull: false
         },
+        checkout_id: {
+            type: DataTypes.INTEGER(),
+            allowNull: false
+        },
         exchange_amount:{
             type: DataTypes.DECIMAL(12,2),
             allowNull: false

@@ -46,9 +46,10 @@ class ProductRepository {
             Product.findByPk(item.product_id)
             .then(product => {
                 if(type == "increment"){
+                    
                     product.increment('quantity', { by: item.quantity });
 
-                    if(item.salePrice !== "" && product.price !== item.salePrice){
+                    if(item.salePrice !== undefined && product.price !== item.salePrice){
                         product.price = item.salePrice;
                         product.save();
                     }

@@ -45,6 +45,14 @@ sequelize.sync()
     {
       name: "CHECKOUT_OUT_CASH",
       description: "Retiro de efectivo"
+    },
+    {
+      name: "CHECKOUT_SALE",
+      description: "Venta registrada"
+    },
+    {
+      name: "CHECKOUT_CANCEL_SALE",
+      description: "Venta anulada"
     }
   ];
 
