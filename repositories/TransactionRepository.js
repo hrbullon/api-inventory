@@ -10,8 +10,16 @@ const Op = Sequelize.Op;
 class TransactionRepository {
 
     static async findTransactionByCheckout(checkout_id) {
+        
+        let today = moment().format("YYYY-MM-DD");
+
         return await CheckoutRegister.findAll({
-            where: { id: checkout_id },
+            where: { 
+                checkout_id: checkout_id,
+                date_time: {
+                    [Op.between]: [`${today} 00:00:00`,`${today} 23:59:59`]
+                }
+            },
             include: [ Checkout, User, Transaction ]
         });
     }
