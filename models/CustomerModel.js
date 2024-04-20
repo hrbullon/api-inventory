@@ -4,6 +4,7 @@ const { DataTypes, Model } = require("sequelize");
 class Customer extends Model {
   static associate(models){
     Customer.hasMany(models.Sale, { foreignKey: 'customer_id' });
+    Customer.hasMany(models.Payment, { foreignKey: 'customer_id' });
   }
 }
 

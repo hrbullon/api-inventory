@@ -10,6 +10,11 @@ class Checkout extends Model {
 
 Checkout.init({
     // Model attributes are defined here
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
     name: {
       type: DataTypes.STRING(45),
       allowNull: false
@@ -19,6 +24,20 @@ Checkout.init({
     sequelize, // We need to pass the connection instance
     modelName: 'Checkout', // We need to choose the model name
     tableName: 'checkouts'
+});
+
+
+  
+sequelize.sync()
+.then(() => {
+
+  return Checkout.findOrCreate({
+      where: { name: "POS001" },
+      defaults: {
+          name:"POS001"
+      }
+  });
+
 });
 
 module.exports = Checkout

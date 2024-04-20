@@ -7,8 +7,11 @@ const Company = require('./CompanyModel.js');
 
 class User extends Model {
     static associate(models){
-        User.hasMany(models.RoleUser, { foreignKey: 'user_id' });
+
         User.belongsTo(models.Company, { foreignKey: 'company_id' });
+
+        User.hasMany(models.Payment, { foreignKey: 'user_id' });
+        User.hasMany(models.RoleUser, { foreignKey: 'user_id' });
         User.hasMany(models.CheckoutRegister, { foreignKey: 'user_id' });
     }
 }
@@ -56,6 +59,21 @@ User.init({
   
 sequelize.sync()
 .then(() => {
+     
+    
+    Company.findOrCreate({
+        where: { id: 1 },
+        defaults: {
+            name:"My Company",
+            legal_name:"Legal Name",
+            dni:"V20000000",
+            address:"My address",
+            email:"mail@domain.com",
+            phone:"12345678910",
+            web:"www.exxample.com"
+        }
+    })
+
     return User.findOrCreate({
         where: { id: 1, account: "admin"},
         defaults: {
@@ -72,6 +90,7 @@ sequelize.sync()
             company_id: 1
         }
     });
+    
 }).then(([record, created]) => {
     console.log(record.get({
     plain: true

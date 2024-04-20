@@ -1,68 +1,60 @@
-const { Op } = require('sequelize');
-const Category = require("../models/CategoryModel");
+
+const { handleError, successResponse } = require('../utils/utils');
+
+const CategoryRepository = require('../repositories/CategoryRepository');
 
 const getAllCategories = async (req, res) => {
     try {
 
-        const search = req.query.search;
-        const condition = search? { name: { [Op.like]: `%${search}%` } } : null;
-        const categories = await Category.findAll({ where: condition, order: [ [ 'id', 'DESC' ]] });
-        
-        res.json({ message: "Ok", categories });
+        const { search } = req.query;
+        const categories = await CategoryRepository.findAll({ search });
+        successResponse( res, { categories });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const getCategoryById = async (req, res) => {
     try {
-        const category = await Category.findByPk(req.params.id);
-        res.json({ message: "Ok", category });
+        
+        const { id } = req.params;
+        const category = await CategoryRepository.findByPk({ id });
+        successResponse( res, { category });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const createCategory = async (req, res) => {
     try {
-        const category = await Category.create(req.body);
-        res.json({ message: "Ok", category });
+        
+        const category = await CategoryRepository.create({ model: req.body });
+        successResponse( res, { category });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const updateCategory = async (req, res) => {
     try {
-        const category = await Category.update(req.body, {
-            where: {
-              id: req.params.id
-            }
-        });
-        res.json({ message: "Ok", category });
+        
+        const { id } = req.params;
+        const { body } = req;
+
+        const category = CategoryRepository.update({ model: body, id: id });
+        successResponse( res, { category });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
-
-const deleteCategory = async (req, res) => {
-    try {
-        const category = await Category.destroy({
-            where: {
-              id: req.params.id
-            }
-        });
-        res.json({ message: "Ok", category });
-    } catch (error) {
-        res.json({ message: error.message });
-    }
-}
-
 
 module.exports = {
     getCategoryById,
     createCategory,
     updateCategory,
-    getAllCategories,
-    deleteCategory
+    getAllCategories
 }

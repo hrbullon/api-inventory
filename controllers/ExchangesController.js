@@ -1,49 +1,60 @@
-const { Op } = require('sequelize');
-const Exchange = require("../models/ExchangeModel");
+
+const { handleError, successResponse } = require('../utils/utils');
+
 const ExchangeRepository = require('../repositories/ExchangeRepository');
 
 const getAllExchanges = async (req, res) => {
     try {
+
         const exchanges = await ExchangeRepository.findAll(req);
-        res.json({ message: "Ok", exchanges });
+        successResponse( res, { exchanges });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const getExchangeById = async (req, res) => {
     try {
+
         const exchange = await ExchangeRepository.findByPk(req.params.id);
-        res.json({ message: "Ok", exchange });
+        successResponse( res, { exchange });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const createExchange = async (req, res) => {
     try {
+
         const exchange = await ExchangeRepository.save(req);
-        res.status(201).json({ message: "Ok", exchange });
+        successResponse( res, { exchange });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const updateExchange = async (req, res) => {
     try {
+
         const exchange = await ExchangeRepository.save(req, req.params.id);
-        res.json({ message: "Ok", exchange });
+        successResponse( res, { exchange });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const deleteExchange = async (req, res) => {
     try {
+        
         const exchange = await ExchangeRepository.destroy(req.params.id);
-        res.json({ message: "Ok", exchange });
+        successResponse( res, { exchange });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 

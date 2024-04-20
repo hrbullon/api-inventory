@@ -2,7 +2,6 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
 const Checkout = require("../models/CheckoutModel");
-const CheckoutRegister = require('../models/CheckoutRegisterModel');
 
 class CheckoutRepository { 
 

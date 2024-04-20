@@ -36,6 +36,9 @@ SaleDetails.init(
         code: {
             type: DataTypes.STRING(150)
         },
+        serial: {
+            type: DataTypes.STRING(150)
+        },
         description: {
             type: DataTypes.STRING(45),
             allowNull: false

@@ -1,14 +1,18 @@
 const jwt = require('jsonwebtoken');
 
+const { handleError, successResponse, notFoundResponse } = require('../utils/utils');
+
 const User = require("../models/UserModel");
 const UserRepository = require('../repositories/UserRepository');
 
 const getAllUsers = async (req, res) => {
     try {
+
         const users = await UserRepository.findAll(req);
-        res.json({ message: "Ok", users });
+        successResponse( res, { users });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
@@ -17,15 +21,12 @@ const getUserById = async (req, res) => {
         const user = await UserRepository.findByPk(req.params.id); 
 
         if(user){
-            res.json({ message: "Ok", user });
+            successResponse( res, { user });
         }else{
-            res.status(404).json({
-                message: "No found",
-                user: null
-            });
+            notFoundResponse( res, {  user: null, message: "Error - Usuario no encontrado" }); 
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        handleError(res, error);
     }
 }
 
@@ -36,9 +37,11 @@ const createUser = async (req, res) => {
         //Decode token
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
         const user = await UserRepository.create(req, decodedToken);
-        res.status(201).json({ message: "Ok", user });
+        
+        successResponse( res, { user });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
@@ -49,14 +52,16 @@ const updateUser = async (req, res) => {
         let user = User.findByPk(id);
 
         if(user){
+            
             const user = await UserRepository.update(req, id);
-            return res.json({ message: "Ok", user });
+            successResponse( res, { user });
+
         }else{
-            return res.status(404).json({ message: "Error - Usuario no encontrado" });
+            notFoundResponse( res, {  user: null, message: "Error - Usuario no encontrado" }); 
         }
 
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
@@ -68,9 +73,10 @@ const deleteUser = async (req, res) => {
             state: action.toString()
         }, { where: { id: id } });
 
-        res.json({ message: "Ok", user });
+        successResponse( res, { user });
+        
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 

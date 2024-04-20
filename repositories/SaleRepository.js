@@ -5,6 +5,8 @@ const Op = Sequelize.Op;
 
 const Sale = require('../models/SaleModel');
 const Customer = require("../models/CustomerModel");
+const Product = require("../models/ProductModel");
+const Category = require("../models/CategoryModel");
 const SaleDetails = require("../models/SaleDetailsModel");
 
 class SaleRepository { 
@@ -60,7 +62,7 @@ class SaleRepository {
 
         const sales = await SaleDetails.findAll({
             where: {
-                code: { [Op.like] : `%${code}%` },
+                code: { [Op.like]: `%${code}%`}, 
                 description: { [Op.like] : `%${product}%` }
             },
             include: [ 
@@ -87,13 +89,25 @@ class SaleRepository {
         const model = { ...req.body };
         model.date = date;
         model.user_id = user;
-        model.state = "1";
+        model.state = "0";
 
         return await Sale.create(model);
     }
 
-    static async changeState(id) {
-        return await Sale.update({ state: "0"}, { where: { id }});
+    static async changeState(saleId, state) {
+        return await Sale.update({ state: state }, { where: { id: saleId }});
+    }
+
+    static async updateTotalPayedAndChange(saleId, totalAmountPayed) {
+        
+        let sale = await Sale.findByPk(saleId);
+
+        if(sale){
+            let total_amount_change = (Number(sale.total_amount) - totalAmountPayed);
+            return await Sale.update({ total_amount_payed: totalAmountPayed, total_amount_change }, { where: { id: saleId }});
+        } else {
+            throw Error("No se ha encontrado la venta solicitada");
+        }
     }
 
     static getCondition(req) {
@@ -101,6 +115,7 @@ class SaleRepository {
         let condition = null;
         let { details } = req.params;
         let { sale_code } = req.query;
+
         let today = moment().format("YYYY-MM-DD");
     
         switch (details) {
@@ -141,6 +156,33 @@ class SaleRepository {
         })
         
         return await SaleDetails.bulkCreate(detailsModel);
+    }
+
+    static async summarySalesByDate(date) {
+
+        const sales = await SaleDetails.findAll({
+            attributes: [
+              [Sequelize.literal('Product.name'), 'product'],
+              [Sequelize.fn('SUM', Sequelize.col('SaleDetails.quantity')), 'quantity'],
+              [Sequelize.fn('SUM', Sequelize.col('SaleDetails.subtotal_amount')), 'total_amount'],
+              [Sequelize.fn('SUM', Sequelize.col('SaleDetails.subtotal_amount_converted')), 'total_amount_converted'],
+            ],
+            include: [
+              {
+                model: Sale,
+                attributes: [],
+                where: { date: date },
+              },
+              {
+                model: Product,
+                attributes: [],
+                include: [{ model: Category, attributes: ['name']}],
+              },
+            ],
+            group: ['product_id'],
+        });
+
+        return sales;
     }
 }
 

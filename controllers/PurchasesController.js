@@ -1,23 +1,29 @@
 const jwt = require('jsonwebtoken');
 
+const { handleError, successResponse } = require('../utils/utils');
+
 const ProductRepository = require('../repositories/ProductRepository');
 const PurchaseRepository = require('../repositories/PurchaseRepository');
 
 const getAllPurchases = async (req, res) => {
     try {
+
         const purchases = await PurchaseRepository.findAll(req);
-        res.json({ message: "Ok", purchases });
+        successResponse( res, { purchases });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const getPurchaseById = async (req, res) => {
     try {
+
         const purchase = await PurchaseRepository.findByPk(req.params.id);
-        res.json({ message: "Ok", purchase });
+        successResponse( res, { purchase });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
@@ -43,7 +49,7 @@ const createPurchase = async (req, res) => {
         res.status(201).json({ message: "Ok", purchase });
 
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
@@ -64,9 +70,10 @@ const deletePurchase = async (req, res) => {
             return res.status(404).json({ message: "Error - Compra no encontrada" });
         }
 
-        res.json({ message: "Ok", purchase });
+        successResponse( res, { purchase });
+
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 

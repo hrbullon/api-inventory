@@ -1,46 +1,35 @@
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
 require('dotenv').config();
 
-const User = require("../models/UserModel");
-const Company = require('../models/CompanyModel');
+const AuthRepository = require('../repositories/AuthRepository');
+const { HTTP_200, MESSAGE_OK, HTTP_400, HTTP_403 } = require('../const/variables');
 
 const login = async (req, res) => {
 
     try {
 
-        let body = req.body;
-    
-        const user = await User.findOne({
-            where: { account: body.account },
-            include: [ Company ],
-            attributes: { exclude: ['createdAt','updatedAt'] }
-        });
+        let token = null;
+        let statusCode = HTTP_403;
+        let { account, password } = req.body;
 
-        if (!user) {
-            return res.status(400).json({ message: 'Usuario o contraseña incorrectos' });
-        }
-        
-        //Is user inactive ?
-        if (user && user.state == "0") {
-            return res.status(403).json({ message: `Usuario inactivo, comunícaquese con el administrador!` });
-        }
+        const { user, message } = await AuthRepository.login({ account, password });
 
-        if (!bcrypt.compareSync(body.password, user.password)) {
-            return res.status(400).json({ message: "Usuario o contraseña incorrectos" });
-        }
-        
-        user.password = "┌∩┐(◣_◢)┌∩┐";
-        user.role = (user.role == "1")? "ADM_ROLE" : "STD_ROLE";
+        if(user && message == MESSAGE_OK){
+            
+            token = jwt.sign({
+                user: user
+            }, process.env.JWT_SEED, { expiresIn: process.env.JWT_EXPIRE });
+            
+            statusCode = HTTP_200;
 
-        let token = jwt.sign({
-            user: user
-        }, process.env.JWT_SEED, { expiresIn: process.env.JWT_EXPIRE });
+        } else if(user && message !== MESSAGE_OK){
+            statusCode = HTTP_403;
+        }
        
-        res.json({ message: "Ok", user, token });
+        res.status(statusCode).json({ message: message, user: user, token });
+
     } catch (error) {
-        res.json({ message: error.message });
+        res.status(HTTP_400).json({ message: error.message });
     }
 }
 

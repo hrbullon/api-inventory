@@ -4,24 +4,19 @@ const { DataTypes, Model, Sequelize } = require("sequelize");
 
 class CheckoutRegister extends Model {
     static associate(models) {
-      CheckoutRegister.belongsTo(models.Checkout, { foreignKey: 'checkout_id' });
+      CheckoutRegister.belongsTo(models.CheckoutSession, { foreignKey: 'checkout_session_id' });
       CheckoutRegister.belongsTo(models.Transaction, { foreignKey: 'transaction_id' });
-      CheckoutRegister.belongsTo(models.User, { foreignKey: 'checkout_id' });
     }
 }
 
 CheckoutRegister.init({
     // Model attributes are defined here
-    checkout_id: {
-      type: DataTypes.INTEGER,
+    checkout_session_id: {
+      type: DataTypes.UUID,
       allowNull: false
     },
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    date_time: {
-      type: DataTypes.DATE,
+    date: {
+      type: DataTypes.DATEONLY,
       defaultValue: Sequelize.NOW
     },
     transaction_id: {
@@ -32,7 +27,7 @@ CheckoutRegister.init({
       type: DataTypes.TEXT,
       allowNull: true
     },
-    amount: {
+    total_amount: {
       type: DataTypes.DECIMAL(12,2),
       allowNull: true
     }

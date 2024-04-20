@@ -40,8 +40,7 @@ Product.init({
     sequelize,
     modelName: 'Product',
     tableName: 'products'
-}
-);
+});
 
 module.exports = Product;
 

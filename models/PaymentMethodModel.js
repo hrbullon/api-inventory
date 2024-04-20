@@ -6,6 +6,9 @@ class PaymentMethod extends Model {
     getName() {
         return this.name.toUpperCase();
     }
+    static associate(models) {
+      PaymentMethod.hasMany(models.Payment, { foreignKey: 'payment_method_id' });
+  }
 }
 
 PaymentMethod.init({
