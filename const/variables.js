@@ -1,3 +1,5 @@
+const ADMIN_ROLE = "ADM_ROLE";
+
 const SALE_STATE_PENDING = "0";
 const SALE_STATE_COMPLETED = "1"
 const SALE_STATE_CANCELLED = "2";
@@ -21,6 +23,7 @@ const HTTP_404 = 404;
 const MESSAGE_OK = 'ok';
 
 module.exports = {
+    ADMIN_ROLE,
     SALE_STATE_PENDING,
     SALE_STATE_COMPLETED,
     SALE_STATE_CANCELLED,

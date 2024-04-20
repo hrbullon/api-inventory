@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
+const { ADMIN_ROLE } = require('../const/variables');
 
 
 // =====================
 // Verify JWT
 // =====================
-let verifyToken = (req, res, next) => {
+let verifyToken = async (req, res, next) => {
 
     let token = req.get('token');
 
@@ -28,7 +29,7 @@ let verifyAdminRole = (req, res, next) => {
 
     let user = req.user;
 
-    if (user.role === 'ADM_ROLE') {
+    if (user.role === ADMIN_ROLE) {
         next();
     } else {
         return res.status(401).json({ error: 'Acción no permitida, intente más tarde' });
