@@ -1,6 +1,8 @@
 const { Op } = require('sequelize');
+
+const { filterFileType } = require('../utils/utils');
+
 require('dotenv').config();
-const filterFileType = require('../utils/utils');
 
 const Category = require("../models/CategoryModel");
 const Product = require("../models/ProductModel");
