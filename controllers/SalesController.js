@@ -8,7 +8,7 @@ const ProductRepository = require('../repositories/ProductRepository');
 const CustomerRepository = require('../repositories/CustomerRepository');
 const TransactionRepository = require('../repositories/TransactionRepository');
 
-const { SALE_STATE_COMPLETED, CHECKOUT_SALE, TRANSACTION_TYPE_CHANGE } = require('../const/variables');
+const { SALE_STATE_PENDING, SALE_STATE_COMPLETED, CHECKOUT_SALE, TRANSACTION_TYPE_CHANGE } = require('../const/variables');
 const CheckoutRepository = require('../repositories/CheckoutRepository');
 
 const getAllSales = async (req, res) => {
@@ -81,14 +81,15 @@ const closeSale = async (req, res) => {
         
         const saleId = req.body.sale_id;  
         let sale = await SaleRepository.findByPk(saleId);
-        let { code, checkout_id, total_amount_payed, total_amount_change, state } = sale;
 
-        if(state != "1")
+        let { code, checkout_session_id, total_amount_payed, total_amount_change, state } = sale;
+
+        if(state == SALE_STATE_PENDING)
         {
             sale = await SaleRepository.changeState(saleId, SALE_STATE_COMPLETED );
-            
+
             const model = {
-                checkout_id: checkout_id,
+                checkout_session_id: checkout_session_id,
                 user_id: decodedToken.user.id,
                 transaction_id: CHECKOUT_SALE,
                 note: `Venta - ${code} - (COBRADA)`,
