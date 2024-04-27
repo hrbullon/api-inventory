@@ -20,11 +20,6 @@ Payment.init({
         type: DataTypes.CHAR(36),
         allowNull: true
     },
-    checkout_id: { 
-        type: DataTypes.INTEGER(),
-        defaultValue: 0,
-        allowNull: false
-    },
     customer_id: { 
         type: DataTypes.INTEGER(),
         defaultValue: 0,

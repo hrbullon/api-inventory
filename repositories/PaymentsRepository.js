@@ -38,7 +38,6 @@ class PaymentRepository {
 
     static async create(data){
         const model = data;
-        model.date = moment(data.date).format("YYYY-MM-DD");
         return await Payment.create(model);
     }
     
