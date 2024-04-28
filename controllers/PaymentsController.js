@@ -62,7 +62,7 @@ const createPayment = async (req, res) => {
 const summaryPaymentsBySession = async (req, res) => {
 
     const { sessionPOST, date } = req.params;
-    const summary = await PaymentsRepository.summaryPaymentsBySession(sessionPOST, date);
+    const summary = await PaymentsRepository.summaryPaymentsBySession(sessionPOST);
     res.json({ message: "Ok", summary } );
 }
 

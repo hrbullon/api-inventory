@@ -49,11 +49,11 @@ class PaymentRepository {
         });
     }
 
-    static async summaryPaymentsBySession(sessionPOS, date, payment_method_id = "") {
+    static async summaryPaymentsBySession(checkoutSessionId, payment_method_id = "") {
 
         const condition = payment_method_id ?
-                { checkout_session_id: sessionPOS, payment_method_id } :   
-                { checkout_session_id: sessionPOS };
+                { checkout_session_id: checkoutSessionId, payment_method_id } :   
+                { checkout_session_id: checkoutSessionId };
 
         const payments = await Payment.findAll({
             attributes: [

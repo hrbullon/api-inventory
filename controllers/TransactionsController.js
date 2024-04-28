@@ -12,6 +12,7 @@ const CheckoutRepository = require('../repositories/CheckoutRepository');
 const getAllTransactionBySessionPOS = async (req, res) => {
     try {
         const transactions = await TransactionRepository.findTransactionBySessionPOS(req.params.sessionPOS);
+        console.log(transactions);
         res.json({ message: "Ok", transactions });
     } catch (error) {
         res.json({ message: error.message });
@@ -30,8 +31,8 @@ const getTransactionSummary = async (req, res) => {
 
 const getSummaryTransaction = async (sessionPOS, date) => {
 
-    const transactions = await TransactionRepository.getTransactionSummary(sessionPOS, date);
-    const payments_cash = await PaymentsRepository.summaryPaymentsBySession(sessionPOS, date, PAYMENT_METHOD_CASH)
+    const transactions = await TransactionRepository.getTransactionSummary(sessionPOS);
+    const payments_cash = await PaymentsRepository.summaryPaymentsBySession(sessionPOS, PAYMENT_METHOD_CASH)
     
     const { 
         total_amount_cash_starting, 

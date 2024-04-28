@@ -2,11 +2,7 @@ const sequelize = require("../database/db.js")
 
 const { DataTypes, Model } = require("sequelize");
 
-class Checkout extends Model {
-    static associate(models) {
-        Checkout.hasMany(models.CheckoutRegister, { foreignKey: 'checkout_id' });
-    }
-}
+class Checkout extends Model {}
 
 Checkout.init({
     // Model attributes are defined here

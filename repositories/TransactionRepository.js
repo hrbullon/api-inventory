@@ -1,16 +1,15 @@
-const User = require("../models/UserModel");
-const Checkout = require("../models/CheckoutModel");
 const CheckoutRegister = require("../models/CheckoutRegisterModel");
 const Transaction = require("../models/TransactionModel");
-const moment = require("moment/moment");
 
 const Sequelize = require('sequelize');
+
 const { 
     TRANSACTION_TYPE_SALE, 
     TRANSACTION_TYPE_CHANGE, 
     TRANSACTION_TYPE_CHECKOUT_OPEN, 
     TRANSACTION_TYPE_CHECKOUT_IN_CASH, 
     TRANSACTION_TYPE_CHECKOUT_OUT_CASH } = require("../const/variables");
+
 const Op = Sequelize.Op;
 
 class TransactionRepository {
@@ -23,23 +22,13 @@ class TransactionRepository {
         });
     }
 
-    static async findTransactionBySessionPOS(sessionPOS) {
-        
-        //let today = moment().format("YYYY-MM-DD");
+    static async findTransactionBySessionPOS(checkoutSessionId) {
         
         return await CheckoutRegister.findAll({
             where: { 
-                session_pos: sessionPOS,
+                checkout_session_id: checkoutSessionId,
             },
             include: [ 
-                {
-                    model: Checkout,
-                    attributes:['id','name']
-                },
-                {
-                    model: User,
-                    attributes:['id','account','firstname','lastname']
-                },
                 {
                     model: Transaction,
                     attributes:['id','description','name']
@@ -62,14 +51,14 @@ class TransactionRepository {
         })
     }
 
-    static async getTotalAmountInOut(sessionPOS, date, type_transaction, column) {
+    static async getTotalAmountInOut(checkoutSessionId, type_transaction) {
         
         const result = await CheckoutRegister.findAll({
             attributes: [
-                [Sequelize.fn('SUM', Sequelize.col(`CheckoutRegister.${column}`)), 'total_amount'],
+                [Sequelize.fn('SUM', Sequelize.col(`CheckoutRegister.total_amount`)), 'total_amount'],
             ],
             where: {                
-                session_pos: sessionPOS,
+                checkout_session_id: checkoutSessionId,
                 transaction_id: type_transaction },
         });
 
@@ -77,12 +66,12 @@ class TransactionRepository {
         return total_amount !== null? parseFloat(total_amount) : 0;
     }
 
-    static async getTransactionSummary(sessionPOS, date) {
+    static async getTransactionSummary(checkoutSessionId) {
 
         const openChash = await CheckoutRegister.findAll({
-            attributes: ['total_amount_in'],
+            attributes: ['total_amount'],
             where: {                
-                session_pos: sessionPOS,
+                checkout_session_id: checkoutSessionId,
                 transaction_id: TRANSACTION_TYPE_CHECKOUT_OPEN },
         });
         
@@ -90,23 +79,23 @@ class TransactionRepository {
         const sales = await CheckoutRegister.findAll({
             attributes: [
                 [Sequelize.fn('COUNT', Sequelize.col('*')), 'count_sales'],
-                [Sequelize.fn('SUM', Sequelize.col('CheckoutRegister.total_amount_in')), 'total_amount_sales'],
+                [Sequelize.fn('SUM', Sequelize.col('CheckoutRegister.total_amount')), 'total_amount_sales'],
             ],
             where: {                
-                session_pos: sessionPOS,
+                checkout_session_id: checkoutSessionId,
                 transaction_id: TRANSACTION_TYPE_SALE },
         });
 
-        const total_amount_change = await this.getTotalAmountInOut(sessionPOS, date, TRANSACTION_TYPE_CHANGE, 'total_amount_out');
+        const total_amount_change = await this.getTotalAmountInOut(checkoutSessionId, TRANSACTION_TYPE_CHANGE);
         let total_amount_sales = parseFloat(sales[0].getDataValue('total_amount_sales'));
 
-        const total_amount_in_cash = await this.getTotalAmountInOut(sessionPOS, date, TRANSACTION_TYPE_CHECKOUT_IN_CASH, 'total_amount_in');
-        const total_amount_out_cash = await this.getTotalAmountInOut(sessionPOS, date, TRANSACTION_TYPE_CHECKOUT_OUT_CASH, 'total_amount_out');
+        const total_amount_in_cash = await this.getTotalAmountInOut(checkoutSessionId, TRANSACTION_TYPE_CHECKOUT_IN_CASH);
+        const total_amount_out_cash = await this.getTotalAmountInOut(checkoutSessionId, TRANSACTION_TYPE_CHECKOUT_OUT_CASH);
 
         let real_total_sale = (parseFloat(total_amount_change)+parseFloat(total_amount_sales));
 
         return { 
-            total_amount_cash_starting: parseFloat(openChash[0].getDataValue('total_amount_in')),
+            total_amount_cash_starting: parseFloat(openChash[0].getDataValue('total_amount')),
             count_sales: parseFloat(sales[0].getDataValue('count_sales')),
             total_amount_sales,
             total_amount_change,

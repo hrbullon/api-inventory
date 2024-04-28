@@ -9,10 +9,8 @@ class User extends Model {
     static associate(models){
 
         User.belongsTo(models.Company, { foreignKey: 'company_id' });
-
         User.hasMany(models.Payment, { foreignKey: 'user_id' });
         User.hasMany(models.RoleUser, { foreignKey: 'user_id' });
-        User.hasMany(models.CheckoutRegister, { foreignKey: 'user_id' });
     }
 }
 
