@@ -52,8 +52,8 @@ class PaymentRepository {
     static async summaryPaymentsBySession(sessionPOS, date, payment_method_id = "") {
 
         const condition = payment_method_id ?
-                { session_pos: sessionPOS, payment_method_id } :   
-                { session_pos: sessionPOS };
+                { checkout_session_id: sessionPOS, payment_method_id } :   
+                { checkout_session_id: sessionPOS };
 
         const payments = await Payment.findAll({
             attributes: [
