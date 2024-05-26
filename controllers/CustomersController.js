@@ -1,90 +1,62 @@
 const { Op } = require('sequelize');
-const Customer = require("../models/CustomerModel");
+
+const CustomerRepository = require('../repositories/CustomerRepository');
+
+const { successResponse, handleError } = require('../utils/utils');
 
 const getAllCustomers = async (req, res) => {
     try {
-
-        let condition = null;
-        let { dni, name, phone, email } = req.query;
-        
-        if(Object.entries(req.query).length > 0 ){
-            condition = { 
-                dni: { [Op.like]: `%${dni}%` },
-                name: { [Op.like]: `%${name}%` }, 
-                phone: { [Op.like]: `%${phone}%` },
-                email: { [Op.like]: `%${email}%` },
-            };
-        }
-
-        const customers = await Customer.findAll({
-            where: condition,
-            attributes: ['id','dni','name','phone','email','address'],
-            order: [ [ 'id', 'DESC' ]]
-        });
-
-        res.json({ message: "Ok", customers });
+        const customers = await CustomerRepository.findAll(req);
+        successResponse( res, { customers: customers } );
     } catch (error) {
-        res.json({ message: error.message });
+        handleError( res, error );
     }
 }
 
 const getCustomerById = async (req, res) => {
     try {
-        const customer = await Customer.findByPk(req.params.id);
-        res.json({ message: "Ok", customer });
+        const customer = await CustomerRepository.findByPk(req.params.id);
+        successResponse( res, { customer: customer } );
     } catch (error) {
-        res.json({ message: error.message });
+        handleError( res, error );
     }
 }
 
 const getCustomerByDni = async (req, res) => {
     try {
-        const customer = await Customer.findOne({
-            where: {
-                dni: req.params.dni
-            }
-        });
-        res.json({ message: 'ok', customer});
+        const customer = await CustomerRepository.findByDNI(req.params.dni);
+        successResponse( res, { customer: customer } );
     } catch (error) {
-        res.json({ message: error.message });
+        handleError( res, error );
     }
 }
 
 const createCustomer = async (req, res) => {
     try {
-        const customer = await Customer.create(req.body);
-        res.json({ message: "Ok", customer });
+        const customer = await CustomerRepository.create(req.body);
+        successResponse( res, { customer: customer } );
     } catch (error) {
-        res.json({ message: error.message });
+        handleError( res, error );
     }
 }
 
 const updateCustomer = async (req, res) => {
     try {
-        const customer = await Customer.update(req.body, {
-            where: {
-              id: req.params.id
-            }
-        });
-        res.json({ message: "Ok", customer });
+        const customer = await CustomerRepository.update(req.body, req.params.id);
+        successResponse( res, { customer: customer } );
     } catch (error) {
-        res.json({ message: error.message });
+        handleError( res, error );
     }
 }
 
 const deleteCustomer = async (req, res) => {
     try {
-        const customer = await Customer.destroy({
-            where: {
-              id: req.params.id
-            }
-        });
-        res.json({ message: "Ok", customer });
+        const customer = await CustomerRepository.destroy(req.params.id);
+        successResponse( res, { customer: customer } );
     } catch (error) {
-        res.json({ message: error.message });
+        handleError( res, error );
     }
 }
-
 
 module.exports = {
     getCustomerById,
