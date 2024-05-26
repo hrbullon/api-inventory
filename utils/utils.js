@@ -1,5 +1,6 @@
 const fs = require('fs');
-const { HTTP_400, HTTP_404 } = require('../const/variables');
+
+const { HTTP_400, HTTP_404, HTTP_403 } = require('../const/variables');
 
 const filterFileType = (file) => {
 
@@ -24,11 +25,16 @@ const notFoundResponse = (res, response ) => {
 const handleError = (res, error) => {
     res.status(HTTP_400).json({ message: error.message });
 };
+
+const handleUnauthorized = (res, error) => {
+    res.status(HTTP_403).json(error);
+};
   
 
 module.exports = {
     filterFileType,
     successResponse,
     notFoundResponse,
-    handleError
+    handleError,
+    handleUnauthorized
 };
