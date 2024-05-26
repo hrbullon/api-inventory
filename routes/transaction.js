@@ -11,7 +11,7 @@ const {
 let app = express(); 
 
 app.post('/transaction', createTransaction);
-app.post('/transaction/sessionPOS/close', closeCkeckoutTransaction);
+app.post('/transaction/checkout/close', closeCkeckoutTransaction);
 app.get('/transactions/:sessionPOS', getAllTransactionBySessionPOS);
 app.get('/transaction/check/:checkoutId', checkStartedTransaction);
 app.get('/transaction/summary/:sessionPOS/:date', getTransactionSummary);

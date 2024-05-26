@@ -16,5 +16,6 @@ app.use( require('./transaction') );
 app.use( require('./payment') );
 app.use( require('./payment_methods') );
 app.use( require('./daily_sales') );
+app.use( require('./checkout_register') );
 
 module.exports = app;

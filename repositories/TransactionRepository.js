@@ -1,4 +1,5 @@
 const CheckoutRegister = require("../models/CheckoutRegisterModel");
+const CheckOutSession = require("../models/CheckOutSessionModel");
 const Transaction = require("../models/TransactionModel");
 
 const Sequelize = require('sequelize');
@@ -41,9 +42,15 @@ class TransactionRepository {
         return await CheckoutRegister.create(body);
     }
 
-    static async checkExistTransaction(CheckoutId, type_transaction) {
+    static async checkExistTransaction(CheckoutId, type_transaction, state) {
         
         return await CheckoutRegister.findOne({
+            include: [ 
+                {
+                    model: CheckOutSession,
+                    where: { state:  state }
+                }
+            ],
             where: {
                 checkout_id: CheckoutId,
                 transaction_id: type_transaction,

@@ -4,11 +4,18 @@ const moment = require("moment/moment");
 const PaymentsRepository = require("../repositories/PaymentsRepository");
 const TransactionRepository = require("../repositories/TransactionRepository");
 
-const { PAYMENT_METHOD_CASH, TRANSACTION_TYPE_CHECKOUT_CLOSE, TRANSACTION_TYPE_CHECKOUT_OPEN, TRANSACTION_TYPE_CHECKOUT_IN_CASH } = require("../const/variables");
 const DailySalesRepository = require('../repositories/DailySalesRepository');
 const CheckoutSessionRepository = require('../repositories/CheckourSessionRepository');
 const CheckoutRepository = require('../repositories/CheckoutRepository');
 
+const { 
+    PAYMENT_METHOD_CASH, 
+    TRANSACTION_TYPE_CHECKOUT_CLOSE, 
+    TRANSACTION_TYPE_CHECKOUT_OPEN, 
+    TRANSACTION_TYPE_CHECKOUT_IN_CASH, 
+    CHECKOUT_SESSION_STATE_ACTIVE, 
+    CHECKOUT_SESSION_STATE_INACTIVE } = require("../const/variables");
+    
 const getAllTransactionBySessionPOS = async (req, res) => {
     try {
         const transactions = await TransactionRepository.findTransactionBySessionPOS(req.params.sessionPOS);
@@ -86,9 +93,11 @@ const checkStartedTransaction = async (req, res) => {
 
         let transaction = null;
         
-        const started = await TransactionRepository.checkExistTransaction(checkoutId, TRANSACTION_TYPE_CHECKOUT_OPEN);
-        const closed = await TransactionRepository.checkExistTransaction(checkoutId, TRANSACTION_TYPE_CHECKOUT_CLOSE);
+        const started = await TransactionRepository.checkExistTransaction(checkoutId, TRANSACTION_TYPE_CHECKOUT_OPEN, CHECKOUT_SESSION_STATE_ACTIVE);
+        const closed = await TransactionRepository.checkExistTransaction(checkoutId, TRANSACTION_TYPE_CHECKOUT_CLOSE, CHECKOUT_SESSION_STATE_INACTIVE);
         
+        console.log(started);
+
         if(started && !closed){
             transaction = started;
         }
@@ -111,31 +120,28 @@ const closeCkeckoutTransaction = async (req, res) => {
         //Decode token
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
 
-        const { sessionPOS, date } = req.body;
+        const { checkoutSessionId } = req.body;
 
-        const checkoutClosed = await TransactionRepository.checkExistTransaction(sessionPOS, TRANSACTION_TYPE_CHECKOUT_CLOSE);
-        
+        const checkoutClosed = await TransactionRepository.checkExistTransaction(checkoutSessionId, TRANSACTION_TYPE_CHECKOUT_CLOSE);
+
         //Check Checkout Closed
         if(!checkoutClosed){
+            
+            let today = moment().format("YYYY-MM-DD");
 
-            const checkoutStarted = await TransactionRepository.checkExistTransaction(sessionPOS, TRANSACTION_TYPE_CHECKOUT_OPEN);
-            const summary = await getSummaryTransaction(sessionPOS, date);
+            const checkoutStarted = await TransactionRepository.checkExistTransaction(checkoutSessionId, TRANSACTION_TYPE_CHECKOUT_OPEN);
+            const summary = await getSummaryTransaction(checkoutSessionId);
             
             const dailySale = {
-                date:  date,
-                user_id: decodedToken.user.id,
-                checkout_id: checkoutId,
+                date:  today,
                 ...summary,
             }
     
             const transaction = {
-                checkout_id: checkoutId,
-                user_id: decodedToken.user.id,
-                date: date,
+                date: today,
                 transaction_id: TRANSACTION_TYPE_CHECKOUT_CLOSE,
                 note: checkoutStarted.note.replace('Apertura','Cierre'),
-                total_amount_in: 0,
-                total_amount_out: summary.total_amount_cash_ending
+                total_amount: summary.total_amount_cash_ending
             }
     
             //Create transaction (CHECKOUT_CLOSE)
