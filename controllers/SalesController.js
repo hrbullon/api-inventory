@@ -7,18 +7,27 @@ const SaleRepository = require('../repositories/SaleRepository');
 const ProductRepository = require('../repositories/ProductRepository');
 const CustomerRepository = require('../repositories/CustomerRepository');
 const TransactionRepository = require('../repositories/TransactionRepository');
-
-const { SALE_STATE_PENDING, SALE_STATE_COMPLETED, CHECKOUT_SALE, TRANSACTION_TYPE_CHANGE } = require('../const/variables');
 const CheckoutRepository = require('../repositories/CheckoutRepository');
+const SaleDetailsRepository = require('../repositories/SaleDetailsRepository');
+
+const { 
+    SALE_STATE_PENDING, 
+    SALE_STATE_COMPLETED, 
+    CHECKOUT_SALE, 
+    TRANSACTION_TYPE_CHANGE, 
+    PRODUCT_DECREMENT,
+    PRODUCT_INCREMENT} = require('../const/variables');
 
 const getAllSales = async (req, res) => {
+    
     try {
+    
         let sales = null;
 
         if(!req.params.details){
             sales = await SaleRepository.findAll(req);
         }else{
-            sales = await SaleRepository.findAllDetails(req);
+            sales = await SaleDetailsRepository.findAll(req);
         }
 
         successResponse( res, { sales });
@@ -55,11 +64,11 @@ const createSale = async (req, res) => {
         }
 
         let sale = await SaleRepository.create(req, decodedToken.user.id);
-        let added = await SaleRepository.createDetails(sale, sale_details);
+        let added = await SaleDetailsRepository.create(sale, sale_details);
 
         if(added){
             //Decrement stock on products
-            await ProductRepository.updateDetails(sale_details, "decrement");
+            await ProductRepository.updateDetails(sale_details, PRODUCT_DECREMENT);
         }
         
         successResponse( res, { sale });
@@ -109,9 +118,9 @@ const closeSale = async (req, res) => {
                 await TransactionRepository.create(model);
             }
 
-            res.json({ message: "Ok", sale });
+            successResponse( res, { sale });
         }else{
-            res.json({ message: "Error al cerrar una venta finalizada" });
+            handleError(res, { message: "Error al cerrar una venta finalizada" });
         }
 
     } catch (error) {
@@ -120,6 +129,7 @@ const closeSale = async (req, res) => {
 }
 
 const deleteSale = async (req, res) => {
+
     try {
         const { id } = req.params;
         //Getting Headers and Body
@@ -135,7 +145,7 @@ const deleteSale = async (req, res) => {
 
         if(sale){
             //Decrement stock on products
-            await ProductRepository.updateDetails(sale.SaleDetails, "increment");
+            await ProductRepository.updateDetails(sale.SaleDetails, PRODUCT_INCREMENT);
 
             //Chage state of sale
             sale = await SaleRepository.changeState(id);
@@ -155,7 +165,7 @@ const deleteSale = async (req, res) => {
             return res.status(404).json({ message: "Error - Venta no encontrada" });
         }
 
-        res.json({ message: "Ok", sale });
+        successResponse( res, { sale });
     } catch (error) {
         handleError(res, error);
     }
@@ -164,8 +174,8 @@ const deleteSale = async (req, res) => {
 const summarySalesByDate = async (req, res) => {
 
     const { date } = req.params;
-    const summary = await SaleRepository.summarySalesByDate(date);
-    res.json( { message: "ok", summary});
+    const summary = await SaleDetailsRepository.summarySalesByDate(date);
+    successResponse( res, { summary });
 
 }
 
