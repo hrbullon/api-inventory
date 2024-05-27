@@ -42,12 +42,12 @@ const createPayment = async (req, res) => {
         await PaymentsDetailsRepository.createDetails(payment.id, payment_details).then( () => {
 
             payment_details.map( async (item) => {
-                let totalPayed = 0;
+                let totalPaid = 0;
                 let payments = await PaymentsRepository.findAllBySale(item.sale_id);
                 //Get total amount payed by sale
-                totalPayed = payments.reduce((acum, payment) => (acum + Number(payment.total_amount)), 0);
-                totalPayed += Number(item.total_amount);
-                await SaleRepository.updateTotalPayedAndChange(item.sale_id, totalPayed);
+                totalPaid = payments.reduce((acum, payment) => (acum + Number(payment.total_amount)), 0);
+                totalPaid += Number(item.total_amount);
+                await SaleRepository.updateTotalPayedAndChange(item.sale_id, totalPaid);
             });
 
         });

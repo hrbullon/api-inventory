@@ -10,6 +10,7 @@ const {
     TRANSACTION_TYPE_CHECKOUT_IN_CASH, 
     TRANSACTION_TYPE_CHECKOUT_OUT_CASH, 
     CHECKOUT_SALE} = require("../const/variables");
+const CheckoutSession = require("../models/CheckOutSessionModel");
 
 const Op = Sequelize.Op;
 
@@ -72,9 +73,17 @@ class CheckoutRegisterRepository {
     }
 
     //checkExistTransaction
-    static async findOneByCheckoutId(CheckoutId, type_transaction) {
+    static async findOneByCheckoutId(CheckoutId, type_transaction, checkout_session_state = false) {
         
         return await CheckoutRegister.findOne({
+            include: [
+                {
+                    model: CheckoutSession,
+                    where: {
+                        state: checkout_session_state
+                    }
+                }
+            ],
             where: {
                 checkout_id: CheckoutId,
                 transaction_id: type_transaction,

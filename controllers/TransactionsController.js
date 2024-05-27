@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const moment = require("moment/moment");
 
 const PaymentsRepository = require("../repositories/PaymentsRepository");
-const TransactionRepository = require("../repositories/TransactionRepository");
+//const TransactionRepository = require("../repositories/TransactionRepository");
 
 const DailySalesRepository = require('../repositories/DailySalesRepository');
 const CheckoutSessionRepository = require('../repositories/CheckourSessionRepository');
@@ -79,38 +79,14 @@ const createTransaction = async (req, res) => {
             req.body.checkout_session_id = sessionPOS.id;
         }
 
-        const transaction = await TransactionRepository.create(req.body);
-        res.json({ message: "Ok", transaction });
+        //const transaction = await TransactionRepository.create(req.body);
+        //res.json({ message: "Ok", transaction });
 
     } catch (error) {
         res.json({ message: error.message });
     }
 } 
 
-const checkStartedTransaction = async (req, res) => {
-    try {
-        let { checkoutId } = req.params;
-
-        let transaction = null;
-        
-        const started = await TransactionRepository.checkExistTransaction(checkoutId, TRANSACTION_TYPE_CHECKOUT_OPEN, CHECKOUT_SESSION_STATE_ACTIVE);
-        const closed = await TransactionRepository.checkExistTransaction(checkoutId, TRANSACTION_TYPE_CHECKOUT_CLOSE, CHECKOUT_SESSION_STATE_INACTIVE);
-        
-        console.log(started);
-
-        if(started && !closed){
-            transaction = started;
-        }
-        
-        if(started && closed){
-            transaction = closed;
-        }
-
-        res.json({ message: "Ok", transaction });
-    } catch (error) {
-        res.json({ message: error.message });
-    }
-} 
 
 const closeCkeckoutTransaction = async (req, res) => {
     try {
@@ -122,14 +98,18 @@ const closeCkeckoutTransaction = async (req, res) => {
 
         const { checkoutSessionId } = req.body;
 
-        const checkoutClosed = await TransactionRepository.checkExistTransaction(checkoutSessionId, TRANSACTION_TYPE_CHECKOUT_CLOSE);
+        let checkoutClosed = null;
+
+        //const checkoutClosed = await TransactionRepository.checkExistTransaction(checkoutSessionId, TRANSACTION_TYPE_CHECKOUT_CLOSE);
 
         //Check Checkout Closed
         if(!checkoutClosed){
             
             let today = moment().format("YYYY-MM-DD");
 
-            const checkoutStarted = await TransactionRepository.checkExistTransaction(checkoutSessionId, TRANSACTION_TYPE_CHECKOUT_OPEN);
+            let checkoutStarted = null;
+
+            //const checkoutStarted = await TransactionRepository.checkExistTransaction(checkoutSessionId, TRANSACTION_TYPE_CHECKOUT_OPEN);
             const summary = await getSummaryTransaction(checkoutSessionId);
             
             const dailySale = {
@@ -145,7 +125,7 @@ const closeCkeckoutTransaction = async (req, res) => {
             }
     
             //Create transaction (CHECKOUT_CLOSE)
-            await TransactionRepository.create(transaction);
+           // await TransactionRepository.create(transaction);
             //Create DailySale
             const checkoutClosed = await DailySalesRepository.create(dailySale);
             res.json({ message: "Ok", checkoutClosed });
@@ -161,7 +141,6 @@ const closeCkeckoutTransaction = async (req, res) => {
 module.exports = { 
     createTransaction,
     getAllTransactionBySessionPOS,
-    checkStartedTransaction,
     getTransactionSummary,
     closeCkeckoutTransaction
 }

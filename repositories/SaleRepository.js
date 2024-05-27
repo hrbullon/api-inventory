@@ -73,16 +73,16 @@ class SaleRepository {
         return await Sale.update({ state: state }, { where: { id: saleId }});
     }
 
-    static async updateTotalPayedAndChange(saleId, totalAmountPayed) {
+    static async updateTotalPayedAndChange(saleId, totalAmountPaid) {
         
         let sale = await Sale.findByPk(saleId);
 
         if(sale){
             
-            let total_amount_change = (Number(sale.total_amount) - totalAmountPayed);
+            let total_amount_change = (Number(sale.total_amount) - totalAmountPaid);
             
             return await Sale.update(
-                { total_amount_payed: totalAmountPayed, total_amount_change }, 
+                { total_amount_paid: totalAmountPaid, total_amount_change }, 
                 { where: { id: saleId }}
             );
 
