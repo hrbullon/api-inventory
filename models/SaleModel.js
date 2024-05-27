@@ -45,7 +45,7 @@ Sale.init(
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
         },
-        total_amount_payed: {
+        total_amount_paid: {
             type: DataTypes.DECIMAL(12,2),
             allowNull: true
         },
@@ -57,7 +57,7 @@ Sale.init(
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
         },
-        state: { type: DataTypes.ENUM("0","1"), comment: "0->Pending,1->Finished,2->Canceled" }
+        state: { type: DataTypes.ENUM("0","1","2"), comment: "0->Pending,1->Finished,2->Canceled" }
     },
     {
         sequelize,

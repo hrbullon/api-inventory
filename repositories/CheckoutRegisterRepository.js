@@ -8,7 +8,8 @@ const {
     TRANSACTION_TYPE_CHANGE, 
     TRANSACTION_TYPE_CHECKOUT_OPEN, 
     TRANSACTION_TYPE_CHECKOUT_IN_CASH, 
-    TRANSACTION_TYPE_CHECKOUT_OUT_CASH } = require("../const/variables");
+    TRANSACTION_TYPE_CHECKOUT_OUT_CASH, 
+    CHECKOUT_SALE} = require("../const/variables");
 
 const Op = Sequelize.Op;
 
@@ -36,6 +37,34 @@ class CheckoutRegisterRepository {
                 }
             ]
         });
+    }
+
+    static async createSalePaid(sale, userId) {
+
+        const { code, checkout_session_id, total_amount_paid } = sale.dataValues;
+
+        const model = {
+            checkout_session_id: checkout_session_id,
+            user_id: userId,
+            transaction_id: CHECKOUT_SALE,
+            note: `Venta - ${code} - (COBRADA)`,
+            total_amount_in: total_amount_paid,
+            total_amount_out: 0
+        };
+
+        return await this.create(model);
+    }
+
+    static async createSaleAmountChange(sale){
+
+        const { code, total_amount_change } = sale.dataValues;
+
+        model.note = `Cambio/Vuelto - ${code}`;
+        model.total_amount_in = 0;
+        model.transaction_id = TRANSACTION_TYPE_CHANGE,
+        model.total_amount_out = total_amount_change;
+
+        return await this.create(model);
     }
     
     static async create(body) {

@@ -6,17 +6,15 @@ const { handleError, successResponse } = require('../utils/utils');
 const SaleRepository = require('../repositories/SaleRepository');
 const ProductRepository = require('../repositories/ProductRepository');
 const CustomerRepository = require('../repositories/CustomerRepository');
-const TransactionRepository = require('../repositories/TransactionRepository');
 const CheckoutRepository = require('../repositories/CheckoutRepository');
 const SaleDetailsRepository = require('../repositories/SaleDetailsRepository');
 
 const { 
     SALE_STATE_PENDING, 
-    SALE_STATE_COMPLETED, 
-    CHECKOUT_SALE, 
-    TRANSACTION_TYPE_CHANGE, 
+    SALE_STATE_COMPLETED,
     PRODUCT_DECREMENT,
     PRODUCT_INCREMENT} = require('../const/variables');
+const CheckoutRegisterRepository = require('../repositories/CheckoutRegisterRepository');
 
 const getAllSales = async (req, res) => {
     
@@ -91,31 +89,15 @@ const closeSale = async (req, res) => {
         const saleId = req.body.sale_id;  
         let sale = await SaleRepository.findByPk(saleId);
 
-        let { code, checkout_session_id, total_amount_payed, total_amount_change, state } = sale;
+        const saleClone = { ...sale };
 
-        if(state == SALE_STATE_PENDING)
+        if(sale.state == SALE_STATE_PENDING)
         {
             sale = await SaleRepository.changeState(saleId, SALE_STATE_COMPLETED );
-
-            const model = {
-                checkout_session_id: checkout_session_id,
-                user_id: decodedToken.user.id,
-                transaction_id: CHECKOUT_SALE,
-                note: `Venta - ${code} - (COBRADA)`,
-                total_amount_in: total_amount_payed,
-                total_amount_out: 0
-            };
+            await CheckoutRegisterRepository.createSalePaid(saleClone, decodedToken.user.id);
     
-            await TransactionRepository.create(model);
-    
-            if(total_amount_change < 0){
-    
-                model.note = `Cambio/Vuelto - ${code}`;
-                model.total_amount_in = 0;
-                model.transaction_id = TRANSACTION_TYPE_CHANGE,
-                model.total_amount_out = total_amount_change;
-    
-                await TransactionRepository.create(model);
+            if(sale.total_amount_change < 0){
+                await CheckoutRegisterRepository.createSaleAmountChange(saleClone);
             }
 
             successResponse( res, { sale });
@@ -159,7 +141,7 @@ const deleteSale = async (req, res) => {
                 total_amount_out: 0
             };
 
-            await TransactionRepository.create(model);
+            //await TransactionRepository.create(model);
 
         }else{
             return res.status(404).json({ message: "Error - Venta no encontrada" });

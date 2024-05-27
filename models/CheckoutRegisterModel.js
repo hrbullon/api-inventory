@@ -28,7 +28,11 @@ CheckoutRegister.init({
       type: DataTypes.TEXT,
       allowNull: true
     },
-    total_amount: {
+    total_amount_in: {
+      type: DataTypes.DECIMAL(12,2),
+      allowNull: true
+    },
+    total_amount_out: {
       type: DataTypes.DECIMAL(12,2),
       allowNull: true
     }
