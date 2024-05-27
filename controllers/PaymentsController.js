@@ -39,7 +39,7 @@ const createPayment = async (req, res) => {
         } 
 
         const payment = await PaymentsRepository.create(paymentModel);
-        await PaymentsDetailsRepository.createDetails(payment.id, payment_details).then( () => {
+        await PaymentsDetailsRepository.create(payment.id, payment_details).then( () => {
 
             payment_details.map( async (item) => {
                 let totalPaid = 0;

@@ -1,8 +1,8 @@
 const PaymentDetails = require("../models/PaymentDetailsModel");
 
-class PaymentsRepository { 
+class PaymentDetailsRepository { 
 
-    static async createDetails(paymentId, details) {
+    static async create(paymentId, details) {
         
         details.forEach(async (detail) => {
             let item = { ...detail, payment_id: paymentId }
@@ -12,4 +12,4 @@ class PaymentsRepository {
 
 } 
 
-module.exports = PaymentsRepository
+module.exports = PaymentDetailsRepository
