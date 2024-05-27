@@ -7,6 +7,12 @@ require('dotenv').config();
 const Category = require("../models/CategoryModel");
 const Product = require("../models/ProductModel");
 
+const { 
+    PRODUCT_INCREMENT, 
+    PRODUCT_DECREMENT, 
+    PRODUCT_STATE_DELETED, 
+    PRODUCT_STATE_ACTIVE } = require('../const/variables');
+
 class ProductRepository { 
 
     static async findByPk(id){
@@ -17,12 +23,12 @@ class ProductRepository {
 
     static async findAll(req){
         
-        let condition = { state: "1" };
+        let condition = { state: PRODUCT_STATE_ACTIVE };
         let { search } = req.query;
 
         if(Object.entries(req.query).length > 0 ){
             condition = { 
-                state: "1" ,
+                state: PRODUCT_STATE_ACTIVE ,
                 [Op.or]: [
                     { name: { [Op.like]: `%${search}%` } },
                     { code: { [Op.like]: `%${search}%` } },
@@ -44,10 +50,12 @@ class ProductRepository {
     }
 
     static async updateDetails(items, type){
+
         items.map( item => {
+
             Product.findByPk(item.product_id)
             .then(product => {
-                if(type == "increment"){
+                if(type == PRODUCT_INCREMENT){
                     
                     product.increment('quantity', { by: item.quantity });
 
@@ -57,7 +65,7 @@ class ProductRepository {
                     }
                 }
     
-                if(type == "decrement"){
+                if(type == PRODUCT_DECREMENT){
                     product.decrement('quantity', { by: item.quantity });
                 }
             });
@@ -67,7 +75,7 @@ class ProductRepository {
     static async create(req){
         
         const model = req.body;
-        model.state = "1";
+        model.state = PRODUCT_STATE_ACTIVE;
 
         //Is there file
         if(req.file !== undefined){
@@ -122,7 +130,7 @@ class ProductRepository {
     }
 
     static async delete(id) {
-        return await Product.update({ state: "0" },{ where: { id } });
+        return await Product.update({ state: PRODUCT_STATE_DELETED },{ where: { id } });
     }
 }
 
