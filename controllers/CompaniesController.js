@@ -1,63 +1,46 @@
-const Company = require("../models/CompanyModel");
+const CompanyRepository = require("../repositories/CompanyRepository");
+
+const { successResponse, handleError } = require("../utils/utils");
 
 const getAllCompanies = async (req, res) => {
     try {
-        const categories = await Company.findAll();
-        res.json({ message: "Ok", categories });
+        const companies = await CompanyRepository.findAll();
+        successResponse( res, { companies });
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const getCompanyById = async (req, res) => {
     try {
-        const company = await Company.findByPk(req.params.id);
-        res.json({ message: "Ok", company });
+        const company = await CompanyRepository.findById(req.params.id);
+        successResponse( res, { company });
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const createCompany = async (req, res) => {
     try {
-        const company = await Company.create(req.body);
-        res.json({ message: "Ok", company });
+        const company = await CompanyRepository.create(req.body);
+        successResponse( res, { company });
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
 
 const updateCompany = async (req, res) => {
     try {
-        const company = await Company.update(req.body, {
-            where: {
-              id: req.params.id
-            }
-        });
-        res.json({ message: "Ok", company });
+        const company = await CompanyRepository.update(req.body, req.params.id);
+        successResponse( res, { company });
     } catch (error) {
-        res.json({ message: error.message });
+        handleError(res, error);
     }
 }
-
-const deleteCompany = async (req, res) => {
-    try {
-        const company = await Company.destroy({
-            where: {
-              id: req.params.id
-            }
-        });
-        res.json({ message: "Ok", company });
-    } catch (error) {
-        res.json({ message: error.message });
-    }
-}
-
 
 module.exports = {
     getCompanyById,
     createCompany,
     updateCompany,
-    getAllCompanies,
-    deleteCompany
+    getAllCompanies
 }
