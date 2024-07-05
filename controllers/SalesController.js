@@ -93,14 +93,16 @@ const closeSale = async (req, res) => {
 
         if(sale.state == SALE_STATE_PENDING)
         {
+            const totalAmountChange = sale.total_amount_change;
+            
             sale = await SaleRepository.changeState(saleId, SALE_STATE_COMPLETED );
             await CheckoutRegisterRepository.createSalePaid(saleClone, decodedToken.user.id);
-    
-            if(sale.total_amount_change < 0){
+
+            if(totalAmountChange < 0){
                 await CheckoutRegisterRepository.createSaleAmountChange(saleClone);
             }
 
-            successResponse( res, { sale });
+            successResponse( res, { sale }); 
         }else{
             handleError(res, { message: "Error al cerrar una venta finalizada" });
         }
@@ -153,10 +155,10 @@ const deleteSale = async (req, res) => {
     }
 }
 
-const summarySalesByDate = async (req, res) => {
+const summarySalesBySession = async (req, res) => {
 
-    const { date } = req.params;
-    const summary = await SaleDetailsRepository.summarySalesByDate(date);
+    const { checkout_session_id } = req.params;
+    const summary = await SaleDetailsRepository.summarySalesBySession(checkout_session_id);
     successResponse( res, { summary });
 
 }
@@ -168,5 +170,5 @@ module.exports = {
     createSale,
     deleteSale,
     closeSale,
-    summarySalesByDate
+    summarySalesBySession
 }

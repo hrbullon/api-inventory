@@ -61,9 +61,9 @@ const createPayment = async (req, res) => {
 
 const summaryPaymentsBySession = async (req, res) => {
 
-    const { sessionPOST, date } = req.params;
-    const summary = await PaymentsRepository.summaryPaymentsBySession(sessionPOST);
-    res.json({ message: "Ok", summary } );
+    const { checkout_session_id } = req.params;
+    const summary = await PaymentsRepository.summaryPaymentsBySession(checkout_session_id);
+    successResponse( res, { summary });
 }
 
 module.exports = {

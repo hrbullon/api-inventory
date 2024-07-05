@@ -44,7 +44,7 @@ class SaleDetailsRepository {
         return await SaleDetails.bulkCreate(detailsModel);
     }
 
-    static async summarySalesByDate(date) {
+    static async summarySalesBySession(checkoutSessionId) {
 
         const sales = await SaleDetails.findAll({
             attributes: [
@@ -57,7 +57,7 @@ class SaleDetailsRepository {
               {
                 model: Sale,
                 attributes: [],
-                where: { date: date },
+                where: { checkout_session_id: checkoutSessionId },
               },
               {
                 model: Product,

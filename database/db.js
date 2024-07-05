@@ -2,11 +2,11 @@ require('dotenv').config();
 
 const { Sequelize } = require('sequelize');
 
-const { DB_DATABASE, DB_USER, DB_PASS, DB_HOSTNAME } = process.env
+const { DB_DATABASE, DB_USER, DB_PASS, DB_HOSTNAME, DB_DIALECT } = process.env
 
 const sequelize = new Sequelize(DB_DATABASE,DB_USER, DB_PASS,{
     host: DB_HOSTNAME,
-    dialect:'mysql'
+    dialect: DB_DIALECT
 })
 
 try {

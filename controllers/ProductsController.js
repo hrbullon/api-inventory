@@ -13,6 +13,16 @@ const getAllProducts = async (req, res) => {
     }
 }
 
+const getAllProductsWithStock = async (req, res) => {
+    try {
+        const products = await ProductRepository.findAllWithStock(req);
+        successResponse( res, { products });
+
+    } catch (error) {
+        handleError(res, error);
+    }
+}
+
 const getProductById = async (req, res) => {
     try {
 
@@ -63,5 +73,6 @@ module.exports = {
     createProduct,
     updateProduct,
     getAllProducts,
-    deleteProduct
+    deleteProduct,
+    getAllProductsWithStock
 }

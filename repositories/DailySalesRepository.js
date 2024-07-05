@@ -10,15 +10,6 @@ class DailySalesRepository {
         return await DailySales.findAll(
             { 
                 attributes: { exclude: [ 'createdAt', 'updatedAt' ]},
-                include: [ 
-                    {
-                        model: Checkout
-                    },
-                    {
-                        attributes:['id','firstname','lastname','account'],
-                        model: User
-                    },
-                 ],
                 order: [ [ 'id', 'DESC' ]]
             }
         );

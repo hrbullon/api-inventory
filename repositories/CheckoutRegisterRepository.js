@@ -58,12 +58,15 @@ class CheckoutRegisterRepository {
 
     static async createSaleAmountChange(sale){
 
-        const { code, total_amount_change } = sale.dataValues;
+        const { code, total_amount_change, checkout_session_id } = sale.dataValues;
 
-        model.note = `Cambio/Vuelto - ${code}`;
-        model.total_amount_in = 0;
-        model.transaction_id = TRANSACTION_TYPE_CHANGE,
-        model.total_amount_out = total_amount_change;
+        const model = {
+            note: `Cambio/Vuelto - ${code}`,
+            total_amount_in: 0,
+            transaction_id:TRANSACTION_TYPE_CHANGE,
+            total_amount_out:total_amount_change,
+            checkout_session_id: checkout_session_id
+        };
 
         return await this.create(model);
     }
@@ -73,19 +76,19 @@ class CheckoutRegisterRepository {
     }
 
     //checkExistTransaction
-    static async findOneByCheckoutId(CheckoutId, type_transaction, checkout_session_state = false) {
+    static async findOneByCheckoutId(checkoutSessionId, type_transaction, checkout_session_state = false) {
         
         return await CheckoutRegister.findOne({
             include: [
                 {
                     model: CheckoutSession,
                     where: {
-                        state: checkout_session_state
+                        id: checkoutSessionId,
                     }
                 }
             ],
             where: {
-                checkout_id: CheckoutId,
+                checkout_session_id: checkoutSessionId,
                 transaction_id: type_transaction,
             }
         })
@@ -108,7 +111,7 @@ class CheckoutRegisterRepository {
         const sales = await CheckoutRegister.findAll({
             attributes: [
                 [Sequelize.fn('COUNT', Sequelize.col('*')), 'count_sales'],
-                [Sequelize.fn('SUM', Sequelize.col('CheckoutRegister.total_amount')), 'total_amount_sales'],
+                [Sequelize.fn('SUM', Sequelize.col('CheckoutRegister.total_amount_in')), 'total_amount_sales'],
             ],
             where: {                
                 checkout_session_id: checkoutSessionId,
@@ -122,13 +125,13 @@ class CheckoutRegisterRepository {
     }
 
     //getTotalAmountInOut
-    static async getSumTotalAmount(condition) {
+    static async getSumTotalAmount(condition, field) {
         
         const result = await CheckoutRegister.findAll({
             attributes: [
                 [
                     Sequelize.fn('SUM', 
-                    Sequelize.col(`CheckoutRegister.total_amount`)), 
+                    Sequelize.col(`CheckoutRegister.${field}`)), 
                     'total_amount'//Alias
                 ],
             ],
@@ -139,13 +142,13 @@ class CheckoutRegisterRepository {
         });
 
         let total_amount = result[0].getDataValue('total_amount');
-        return total_amount !== null? parseFloat(total_amount) : 0;
+        return total_amount? parseFloat(total_amount) : 0;
     }
     //getTransactionSummary
     static async getSummary(checkoutSessionId) {
 
         const openChash = await CheckoutRegister.findAll({
-            attributes: ['total_amount'],
+            attributes: ['total_amount_in'],
             where: {                
                 checkout_session_id: checkoutSessionId,
                 transaction_id: TRANSACTION_TYPE_CHECKOUT_OPEN 
@@ -161,7 +164,7 @@ class CheckoutRegisterRepository {
                     'count_sales' //Alias
                 ],
                 [   Sequelize.fn('SUM', 
-                    Sequelize.col('CheckoutRegister.total_amount')), 
+                    Sequelize.col('CheckoutRegister.total_amount_in')), 
                     'total_amount_sales' //Alias
                 ],
             ],
@@ -186,16 +189,17 @@ class CheckoutRegisterRepository {
             transactionType: TRANSACTION_TYPE_CHECKOUT_OUT_CASH
         };
 
-        let total_amount_sales = parseFloat(sales[0].getDataValue('total_amount_sales'));
+        let total_amount_sales_result = sales[0].getDataValue('total_amount_sales');
+        let total_amount_sales = (total_amount_sales_result)? parseFloat(total_amount_sales_result) : 0;
 
         return { 
-            total_amount_cash_starting: parseFloat(openChash[0].getDataValue('total_amount')),
+            total_amount_cash_starting: parseFloat(openChash[0].getDataValue('total_amount_in')),
             count_sales: parseFloat(sales[0].getDataValue('count_sales')),
             total_amount_sales,
-            total_amount_change: await this.getSumTotalAmount(transactionTypeChange),
-            total_amount_in_cash: await this.getSumTotalAmount(transactionTypeInCash),
-            total_amount_out_cash: await this.getSumTotalAmount(transactionTypeOutCash),
-            real_total_sale: (parseFloat(total_amount_change)+parseFloat(total_amount_sales))
+            total_amount_change: await this.getSumTotalAmount(transactionTypeChange,'total_amount_out'),
+            total_amount_in_cash: await this.getSumTotalAmount(transactionTypeInCash,'total_amount_in'),
+            total_amount_out_cash: await this.getSumTotalAmount(transactionTypeOutCash, 'total_amount_out'),
+            real_total_sale: (parseFloat(0)+parseFloat(total_amount_sales))
          };
     }
 }

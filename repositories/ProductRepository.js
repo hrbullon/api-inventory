@@ -49,6 +49,21 @@ class ProductRepository {
         return products;
     }
 
+    static async findAllWithStock(){
+
+        const products = await Product.findAll({
+            where: {
+                quantity: {
+                  [Op.gt]: 0, // Apply the condition for quantity greater than 0
+                },
+            },
+            order: [['name', 'ASC']],
+            attributes: ['id','code','name','quantity','price','image']
+        });
+
+        return products;
+    }
+
     static async updateDetails(items, type){
 
         items.map( item => {
