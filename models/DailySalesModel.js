@@ -2,7 +2,9 @@ const sequelize = require("../database/db.js")
 const { DataTypes, Model } = require("sequelize");
 
 class DailySales extends Model {
-    static associate(models) {}
+    static associate(models) {
+        DailySales.belongsTo(models.CheckoutSession, { foreignKey: 'checkout_session_id' });
+    }
 }
 
 DailySales.init({

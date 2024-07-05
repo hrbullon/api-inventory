@@ -7,6 +7,7 @@ class CheckoutSession extends Model {
         CheckoutSession.belongsTo(models.Checkout, { foreignKey: 'checkout_id' });
         CheckoutSession.belongsTo(models.User, { foreignKey: 'user_id' });
         CheckoutSession.hasMany(models.CheckoutRegister, { foreignKey: 'checkout_session_id' });
+        CheckoutSession.hasMany(models.DailySales, { foreignKey: 'checkout_session_id' });
     }
 }
 
