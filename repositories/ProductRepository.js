@@ -23,12 +23,11 @@ class ProductRepository {
 
     static async findAll(req){
         
-        let condition = { state: PRODUCT_STATE_ACTIVE };
+        let condition = null;
         let { search } = req.query;
 
         if(Object.entries(req.query).length > 0 ){
             condition = { 
-                state: PRODUCT_STATE_ACTIVE ,
                 [Op.or]: [
                     { name: { [Op.like]: `%${search}%` } },
                     { code: { [Op.like]: `%${search}%` } },
