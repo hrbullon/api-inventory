@@ -4,6 +4,9 @@ const  Sequelize  = require("sequelize");
 const Payment = require("../models/PaymentModel");
 const PaymentMethod = require("../models/PaymentMethodModel");
 const PaymentDetails = require("../models/PaymentDetailsModel");
+const { PAYMENT_DELETED_FALSE } = require("../const/variables");
+
+const sequelize = require("../database/db");
 
 class PaymentRepository { 
 
@@ -14,7 +17,8 @@ class PaymentRepository {
     static async findAllBySale(saleId) { 
 
         const payments = await Payment.findAll({
-            attributes: ['reference','exchange_amount','total_amount','total_amount_converted'],
+            attributes: ['id','reference','exchange_amount','total_amount','total_amount_converted'],
+            where: { deleted: PAYMENT_DELETED_FALSE },
             include: [ 
                 {
                     model: PaymentDetails,
@@ -42,18 +46,40 @@ class PaymentRepository {
     }
     
     static async delete(id){
-        return await Payment.destroy({
+
+        const payment = await this.findByPk(id);
+
+        if(payment){
+            payment.deleted = "1";
+            return payment.save();
+        }else{
+            return false;
+        }
+    }
+
+    static async get_total_amount_paid_by_sale(saleId){
+
+        return await PaymentDetails.findAll({
+            attributes: [
+                [Sequelize.fn('SUM', Sequelize.col('PaymentDetails.total_amount')), 'total_amount'],
+            ],
+            include: [
+                {
+                    model: Payment,
+                    where: { deleted: PAYMENT_DELETED_FALSE }
+                }
+            ],
             where: {
-              id: id
-            }
+                sale_id: saleId,
+            }    
         });
     }
 
     static async summaryPaymentsBySession(checkoutSessionId, payment_method_id = "") {
 
         const condition = payment_method_id ?
-                { checkout_session_id: checkoutSessionId, payment_method_id } :   
-                { checkout_session_id: checkoutSessionId };
+                { checkout_session_id: checkoutSessionId, payment_method_id, deleted: PAYMENT_DELETED_FALSE } :   
+                { checkout_session_id: checkoutSessionId, deleted: PAYMENT_DELETED_FALSE };
 
         const payments = await Payment.findAll({
             attributes: [

@@ -7,6 +7,8 @@ const SaleRepository = require('../repositories/SaleRepository');
 const PaymentsRepository = require('../repositories/PaymentsRepository');
 const PaymentsDetailsRepository = require('../repositories/PaymentsDetailsRepository');
 
+const { PAYMENT_DELETED_FALSE } = require('../const/variables');
+
 const getAllPaymentsBySale = async (req, res) => {
     try {
         
@@ -34,6 +36,7 @@ const createPayment = async (req, res) => {
         let paymentModel = {
             ...req.body,
             date,
+            deleted: PAYMENT_DELETED_FALSE,
             checkout_id:1,//Still to get a multi chekout register
             user_id: decodedToken.user.id
         } 
@@ -59,6 +62,24 @@ const createPayment = async (req, res) => {
     }
 }
 
+const deletePayment = async (req, res) => {
+
+    const { id } = req.params;
+    const { saleId } = req.params;
+
+    const deleted = await PaymentsRepository.delete(id);
+    
+    const total_amount_paid = await PaymentsRepository.get_total_amount_paid_by_sale(saleId);
+
+    if(total_amount_paid.total_amount !== undefined) {
+        await SaleRepository.updateTotalPayedAndChange(saleId, total_amount_paid.total_amount);        
+    } else {
+        await SaleRepository.resetTotalAmountPaidAndChange(saleId);
+    }
+    
+    successResponse( res, { deleted });
+} 
+
 const summaryPaymentsBySession = async (req, res) => {
 
     const { checkout_session_id } = req.params;
@@ -69,5 +90,6 @@ const summaryPaymentsBySession = async (req, res) => {
 module.exports = {
     getAllPaymentsBySale,
     createPayment,
+    deletePayment,
     summaryPaymentsBySession
 }

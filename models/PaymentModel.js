@@ -56,6 +56,7 @@ Payment.init({
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false
     },
+    deleted: { type: DataTypes.ENUM("0","1"), comment: "0->Activo,1->Eliminado" },
     state: { type: DataTypes.ENUM("0","1"), comment: "0->Pendiente,1->Aprobado" }
   }, {
     // Other model options go here

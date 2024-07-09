@@ -72,6 +72,10 @@ class SaleRepository {
     static async changeState(saleId, state) {
         return await Sale.update({ state: state }, { where: { id: saleId }});
     }
+    
+    static async resetTotalAmountPaidAndChange(saleId) {
+        return await Sale.update({ total_amount_paid: 0, total_amount_change: 0 }, { where: { id: saleId }});
+    }
 
     static async updateTotalPayedAndChange(saleId, totalAmountPaid) {
         
@@ -79,7 +83,7 @@ class SaleRepository {
 
         if(sale){
             
-            let total_amount_change = (Number(sale.total_amount) - totalAmountPaid);
+            let total_amount_change = totalAmountPaid > 0 ? (Number(sale.total_amount) - totalAmountPaid) : 0;
             
             return await Sale.update(
                 { total_amount_paid: totalAmountPaid, total_amount_change }, 
