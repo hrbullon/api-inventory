@@ -4,6 +4,7 @@ const app = express();
 
 app.use( require('./admin') );
 app.use( require('./category') );
+app.use( require('./discount') );
 app.use( require('./exchange') );
 app.use( require('./company') );
 app.use( require('./customer') );
