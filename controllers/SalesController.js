@@ -13,7 +13,9 @@ const {
     SALE_STATE_PENDING, 
     SALE_STATE_COMPLETED,
     PRODUCT_DECREMENT,
-    PRODUCT_INCREMENT} = require('../const/variables');
+    PRODUCT_INCREMENT,
+    TRANSACTION_TYPE_CHECKOUT_CANCEL_SALE,
+    SALE_STATE_CANCELLED} = require('../const/variables');
 const CheckoutRegisterRepository = require('../repositories/CheckoutRegisterRepository');
 
 const getAllSales = async (req, res) => {
@@ -123,7 +125,6 @@ const deleteSale = async (req, res) => {
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
         
         let sale = await SaleRepository.findByPk(id);
-        let { code, checkout_id, total_amount } = sale;
         //Get data customer
         const customer = await CustomerRepository.findByPk(sale.customer_id);
 
@@ -132,24 +133,24 @@ const deleteSale = async (req, res) => {
             await ProductRepository.updateDetails(sale.SaleDetails, PRODUCT_INCREMENT);
 
             //Chage state of sale
-            sale = await SaleRepository.changeState(id);
+            sale = await SaleRepository.changeState(id, SALE_STATE_CANCELLED);
             
             const model = {
-                checkout_id: checkout_id,
+                checkout_id: sale.checkout_id,
                 user_id: decodedToken.user.id,
-                transaction_id: 6,
-                note: `Venta - ${code} - (ANULADA) - ${customer.name}`,
-                total_amount_in: sale.total_amount,
-                total_amount_out: 0
+                transaction_id: TRANSACTION_TYPE_CHECKOUT_CANCEL_SALE,
+                note: `Venta - ${sale.code} - (ANULADA) - ${customer.name}`,
+                total_amount_in: 0,
+                total_amount_out: sale.total_amount
             };
 
-            //await TransactionRepository.create(model);
+            await CheckoutRegisterRepository.create(model)
+            successResponse( res, { sale });
 
         }else{
             return res.status(404).json({ message: "Error - Venta no encontrada" });
         }
 
-        successResponse( res, { sale });
     } catch (error) {
         handleError(res, error);
     }
