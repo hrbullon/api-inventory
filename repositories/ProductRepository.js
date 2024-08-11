@@ -63,27 +63,25 @@ class ProductRepository {
         return products;
     }
 
-    static async updateDetails(items, type){
+    static async updateDetails(item, type){
 
-        items.map( item => {
+        Product.findByPk(item.product_id)
+        .then(product => {
+            if(type == PRODUCT_INCREMENT){
+                
+                product.increment('quantity', { by: item.quantity });
 
-            Product.findByPk(item.product_id)
-            .then(product => {
-                if(type == PRODUCT_INCREMENT){
-                    
-                    product.increment('quantity', { by: item.quantity });
-
-                    if(item.salePrice !== undefined && product.price !== item.salePrice){
-                        product.price = item.salePrice;
-                        product.save();
-                    }
+                if(item.salePrice !== undefined && product.price !== item.salePrice){
+                    product.price = item.salePrice;
+                    product.save();
                 }
-    
-                if(type == PRODUCT_DECREMENT){
-                    product.decrement('quantity', { by: item.quantity });
-                }
-            });
+            }
+
+            if(type == PRODUCT_DECREMENT){
+                product.decrement('quantity', { by: item.quantity });
+            }
         });
+        
     }
 
     static async create(req){

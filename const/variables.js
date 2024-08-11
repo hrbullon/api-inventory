@@ -26,6 +26,8 @@ const PAYMENT_DELETED_FALSE = "0";
 
 const CHECKOUT_SALE = 5;
 
+const IS_NULL = null;
+
 const HTTP_200 = 200;
 const HTTP_400 = 400;
 const HTTP_403 = 403;
@@ -55,6 +57,7 @@ module.exports = {
     PAYMENT_METHOD_CASH,
     PAYMENT_DELETED_TRUE,
     PAYMENT_DELETED_FALSE,
+    IS_NULL,
     HTTP_200,
     HTTP_400,
     HTTP_403,

@@ -32,16 +32,14 @@ class SaleDetailsRepository {
 
     }
 
-    static async create(sale, details) {
+    static async findAllBySale(sale) {
+        return await SaleDetails.findAll({
+            where: { sale_id: sale }
+        });
+    }
 
-        const detailsModel = [];
-
-        details.map( detail => {
-            const item = { sale_id: sale.id, ...detail  };
-            detailsModel.push(item);
-        })
-        
-        return await SaleDetails.bulkCreate(detailsModel);
+    static async create(data) {
+        return await SaleDetails.create(data);
     }
 
     static async summarySalesBySession(checkoutSessionId) {

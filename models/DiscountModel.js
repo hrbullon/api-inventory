@@ -12,12 +12,21 @@ Discount.init({
         type: DataTypes.DECIMAL(3,2),
         allowNull: true
     },
-    amount: { 
+    total_amount_sale: { 
+        type: DataTypes.DECIMAL(12,2),
+        allowNull: false,
+        comment:'Base amount'
+    },
+    total_amount_sale_converted: { 
         type: DataTypes.DECIMAL(12,2),
         allowNull: false,
         comment:'Base amount'
     },
     discount: { 
+        type: DataTypes.DECIMAL(12,2),
+        allowNull: false
+    },
+    discount_converted: { 
         type: DataTypes.DECIMAL(12,2),
         allowNull: false
     },

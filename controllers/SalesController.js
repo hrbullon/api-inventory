@@ -56,7 +56,7 @@ const createSale = async (req, res) => {
 
         //Decode token
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
-        const { checkout_id, sale_details } = req.body;
+        const { checkout_id } = req.body;
 
         if(checkout_id){
             const checkout = await CheckoutRepository.findByCode(checkout_id);
@@ -64,18 +64,33 @@ const createSale = async (req, res) => {
         }
 
         let sale = await SaleRepository.create(req, decodedToken.user.id);
-        let added = await SaleDetailsRepository.create(sale, sale_details);
-
-        if(added){
-            //Decrement stock on products
-            await ProductRepository.updateDetails(sale_details, PRODUCT_DECREMENT);
-        }
         
         successResponse( res, { sale });
 
     } catch (error) {
         handleError(res, error);
     }
+}
+
+const createSaleDetails = async (req, res) => {
+
+    try { 
+
+        let added = await SaleDetailsRepository.create(req.body);
+    
+        if(added){
+            //Decrement stock on products
+            await ProductRepository.updateDetails(added, PRODUCT_DECREMENT);
+            const sale = await SaleRepository.findByPk(req.body.sale_id);  
+            const saleUpdated = await SaleRepository.updateTotalAmountSale(req.body.sale_id, sale.SaleDetails);  
+            
+            successResponse( res, { sale:  saleUpdated });
+        }
+
+    } catch (error) {
+        handleError(res, error);
+    }
+
 }
 
 const closeSale = async (req, res) => {
@@ -156,6 +171,21 @@ const deleteSale = async (req, res) => {
     }
 }
 
+const deleteSaleDetails = async (req, res) => {
+    try {
+        const { id, detail } = req.params;
+
+        const destroyed = await SaleRepository.deleteSaleDetails(id, detail);
+        const sale = await SaleRepository.findByPk(id);  
+        await SaleRepository.updateTotalAmountSale(id, sale.SaleDetails);  
+
+        successResponse( res, { deleted: destroyed } );
+
+    } catch (error) {
+        handleError( res, error );
+    }
+}
+
 const summarySalesBySession = async (req, res) => {
 
     const { checkout_session_id } = req.params;
@@ -171,5 +201,7 @@ module.exports = {
     createSale,
     deleteSale,
     closeSale,
+    createSaleDetails,
+    deleteSaleDetails,
     summarySalesBySession
 }

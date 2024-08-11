@@ -77,6 +77,27 @@ class SaleRepository {
         return await Sale.update({ total_amount_paid: 0, total_amount_change: 0 }, { where: { id: saleId }});
     }
 
+    static async updateTotalAmountSale(saleId, details) {
+        
+        let sale = await Sale.findByPk(saleId);
+
+        if(sale){
+            
+            const totalAmount = details.reduce((acum, item) => acum + item.subtotal_amount, 0);
+            const totalAmountConverted = details.reduce((acum, item) => acum + item.subtotal_amount_converted, 0);
+            
+            await Sale.update(
+                { total_amount: totalAmount, total_amount_converted: totalAmountConverted }, 
+                { where: { id: saleId }}
+            );
+
+            return await this.findByPk(saleId);
+
+        } else {
+            throw Error("No se ha encontrado la venta solicitada");
+        }
+    }
+
     static async updateTotalPayedAndChange(saleId, totalAmountPaid) {
         
         let sale = await Sale.findByPk(saleId);
@@ -93,6 +114,12 @@ class SaleRepository {
         } else {
             throw Error("No se ha encontrado la venta solicitada");
         }
+    }
+
+    static async deleteSaleDetails(sale, detail) {
+        return await SaleDetails.destroy({
+            where: { id: detail, sale_id: sale} 
+        });
     }
 }
 
