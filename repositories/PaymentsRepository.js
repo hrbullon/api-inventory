@@ -1,12 +1,9 @@
-const moment = require("moment/moment");
 const  Sequelize  = require("sequelize");
 
 const Payment = require("../models/PaymentModel");
 const PaymentMethod = require("../models/PaymentMethodModel");
 const PaymentDetails = require("../models/PaymentDetailsModel");
 const { PAYMENT_DELETED_FALSE } = require("../const/variables");
-
-const sequelize = require("../database/db");
 
 class PaymentRepository { 
 
@@ -59,9 +56,10 @@ class PaymentRepository {
 
     static async get_total_amount_paid_by_sale(saleId){
 
-        return await PaymentDetails.findAll({
+        return await PaymentDetails.findOne({
             attributes: [
                 [Sequelize.fn('SUM', Sequelize.col('PaymentDetails.total_amount')), 'total_amount'],
+                [Sequelize.fn('SUM', Sequelize.col('PaymentDetails.total_amount_converted')), 'total_amount_converted']
             ],
             include: [
                 {

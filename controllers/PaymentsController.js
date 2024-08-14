@@ -42,20 +42,31 @@ const createPayment = async (req, res) => {
         } 
 
         const payment = await PaymentsRepository.create(paymentModel);
-        await PaymentsDetailsRepository.create(payment.id, payment_details).then( () => {
+
+        await PaymentsDetailsRepository.create(payment.id, payment_details).then( async () => {
 
             payment_details.map( async (item) => {
-                let totalPaid = 0;
+                
                 let payments = await PaymentsRepository.findAllBySale(item.sale_id);
+                
                 //Get total amount paid by sale
-                totalPaid = payments.reduce((acum, payment) => (acum + Number(payment.total_amount)), 0);
-                totalPaid += Number(item.total_amount);
+                let totalAmountPaid = payments.reduce((acum, payment) =>{ return ( acum + Number(payment.total_amount)) }, 0);
+                let totalAmountPaidConverted = payments.reduce((acum, payment) => { return (acum + Number(payment.total_amount_converted)) }, 0);
+                
+                totalAmountPaid += Number(item.total_amount);
+                totalAmountPaidConverted += Number(item.total_amount_converted);
+
+                const totalPaid = {
+                    total_amount: totalAmountPaid,
+                    total_amount_converted: totalAmountPaidConverted,
+                }
+
                 await SaleRepository.updateTotalPaidAndChange(item.sale_id, totalPaid);
             });
-
+            
         });
-
-        res.json({ message: "Ok", payment } );
+        
+        successResponse( res, { payment });
 
     } catch (error) {
         handleError(res, error);
@@ -71,8 +82,8 @@ const deletePayment = async (req, res) => {
     
     const total_amount_paid = await PaymentsRepository.get_total_amount_paid_by_sale(saleId);
 
-    if(total_amount_paid[0].total_amount > 0) {
-        await SaleRepository.updateTotalPaidAndChange(saleId, total_amount_paid[0].total_amount);        
+    if(total_amount_paid.total_amount > 0) {
+        await SaleRepository.updateTotalPaidAndChange(saleId, total_amount_paid);        
     } else {
         await SaleRepository.resetTotalAmountPaidAndChange(saleId);
     }

@@ -70,6 +70,10 @@ class SaleRepository {
         model.discount = 0;
         model.discount_converted = 0;
 
+        model.total_amount_paid = 0;
+        model.total_amount_paid_converted = 0;
+        model.total_amount_change = 0;
+
         return await Sale.create(model);
     }
 
@@ -78,7 +82,11 @@ class SaleRepository {
     }
     
     static async resetTotalAmountPaidAndChange(saleId) {
-        return await Sale.update({ total_amount_paid: 0, total_amount_change: 0 }, { where: { id: saleId }});
+        return await Sale.update({ 
+            total_amount_paid: 0, 
+            total_amount_paid_converted: 0, 
+            total_amount_change: 0 
+        }, { where: { id: saleId }});
     }
 
     static async updateTotalAmountSale(saleId, details) {
@@ -147,13 +155,14 @@ class SaleRepository {
 
         if(sale){
 
-            let total_amount_paid_converted = (sale.exchage_amount*totalAmountPaid).toFixed(2);
-            let total_amount_change = totalAmountPaid > 0 ? (Number(sale.total_amount) - totalAmountPaid) : 0;
-            
+            let total_amount_change = totalAmountPaid.total_amount > 0 ? (Number(sale.total_amount) - totalAmountPaid.total_amount) : 0;
+            let totalPaid = (totalAmountPaid.total_amount)? totalAmountPaid.total_amount : 0;
+            let totalPaidConverted = (totalAmountPaid.total_amount_converted)? totalAmountPaid.total_amount_converted : 0;
+
             return await Sale.update(
                 { 
-                    total_amount_paid: totalAmountPaid, 
-                    total_amount_paid_converted: total_amount_paid_converted,
+                    total_amount_paid: totalPaid, 
+                    total_amount_paid_converted: totalPaidConverted,
                     total_amount_change 
                 }, 
                 { where: { id: saleId }}
