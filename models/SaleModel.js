@@ -41,6 +41,14 @@ Sale.init(
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
         },
+        subtotal_amount: {
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: false
+        },
+        discount_amount: {
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: true
+        },
         total_amount: {
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
@@ -49,13 +57,25 @@ Sale.init(
             type: DataTypes.DECIMAL(12,2),
             allowNull: true
         },
-        total_amount_change: {
+        subtotal_amount_converted: {
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: false
+        },
+        discount_amount_converted: {
             type: DataTypes.DECIMAL(12,2),
             allowNull: true
         },
         total_amount_converted: {
             type: DataTypes.DECIMAL(12,2),
             allowNull: false
+        },
+        total_amount_paid_converted: {
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: true
+        },
+        total_amount_change: {
+            type: DataTypes.DECIMAL(12,2),
+            allowNull: true
         },
         state: { type: DataTypes.ENUM("0","1","2"), comment: "0->Pending,1->Finished,2->Canceled" }
     },

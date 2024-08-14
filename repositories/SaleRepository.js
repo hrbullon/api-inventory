@@ -62,9 +62,13 @@ class SaleRepository {
         const date = moment().format("YYYY-MM-DD");
 
         const model = { ...req.body };
+
         model.date = date;
         model.user_id = user;
         model.state = "0";
+
+        model.discount = 0;
+        model.discount_converted = 0;
 
         return await Sale.create(model);
     }
@@ -87,7 +91,12 @@ class SaleRepository {
             const totalAmountConverted = details.reduce((acum, item) => acum + item.subtotal_amount_converted, 0);
             
             await Sale.update(
-                { total_amount: totalAmount, total_amount_converted: totalAmountConverted }, 
+                { 
+                    subtotal_amount: totalAmount, 
+                    subtotal_amount_converted: totalAmountConverted,
+                    total_amount: (totalAmount-sale.discount_amount), 
+                    total_amount_converted: (totalAmountConverted-sale.discount_amount_converted)
+                }, 
                 { where: { id: saleId }}
             );
 
@@ -98,16 +107,40 @@ class SaleRepository {
         }
     }
 
-    static async updateTotalPayedAndChange(saleId, totalAmountPaid) {
+    static async updateDiscountAmount(saleId, discount, discountConverted){
+
+        let sale = await this.findByPk(saleId)
+
+        if(sale){
+
+            let discount_amount = (Number(sale.discount_amount)+discount);
+            let discount_amount_converted = (Number(sale.discount_amount_converted)+discountConverted);
+    
+            sale.discount_amount = discount_amount;
+            sale.discount_amount_converted = discount_amount_converted;
+    
+            sale.total_amount = Number(sale.subtotal_amount)-discount_amount;
+            sale.total_amount_converted = Number(sale.subtotal_amount_converted)-discount_amount_converted;
+            
+            return sale.save();
+        }
+    }
+
+    static async updateTotalPaidAndChange(saleId, totalAmountPaid) {
         
         let sale = await Sale.findByPk(saleId);
 
         if(sale){
-            
+
+            let total_amount_paid_converted = (sale.exchage_amount*totalAmountPaid).toFixed(2);
             let total_amount_change = totalAmountPaid > 0 ? (Number(sale.total_amount) - totalAmountPaid) : 0;
             
             return await Sale.update(
-                { total_amount_paid: totalAmountPaid, total_amount_change }, 
+                { 
+                    total_amount_paid: totalAmountPaid, 
+                    total_amount_paid_converted: total_amount_paid_converted,
+                    total_amount_change 
+                }, 
                 { where: { id: saleId }}
             );
 

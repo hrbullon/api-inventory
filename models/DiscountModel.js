@@ -8,6 +8,7 @@ Discount.init({
         type: DataTypes.INTEGER(),
         allowNull: false
     },
+    description: { type: DataTypes.STRING(300) },
     percentage: { 
         type: DataTypes.DECIMAL(3,2),
         allowNull: true

@@ -47,10 +47,10 @@ const createPayment = async (req, res) => {
             payment_details.map( async (item) => {
                 let totalPaid = 0;
                 let payments = await PaymentsRepository.findAllBySale(item.sale_id);
-                //Get total amount payed by sale
+                //Get total amount paid by sale
                 totalPaid = payments.reduce((acum, payment) => (acum + Number(payment.total_amount)), 0);
                 totalPaid += Number(item.total_amount);
-                await SaleRepository.updateTotalPayedAndChange(item.sale_id, totalPaid);
+                await SaleRepository.updateTotalPaidAndChange(item.sale_id, totalPaid);
             });
 
         });
@@ -71,8 +71,8 @@ const deletePayment = async (req, res) => {
     
     const total_amount_paid = await PaymentsRepository.get_total_amount_paid_by_sale(saleId);
 
-    if(total_amount_paid.total_amount !== undefined) {
-        await SaleRepository.updateTotalPayedAndChange(saleId, total_amount_paid.total_amount);        
+    if(total_amount_paid[0].total_amount > 0) {
+        await SaleRepository.updateTotalPaidAndChange(saleId, total_amount_paid[0].total_amount);        
     } else {
         await SaleRepository.resetTotalAmountPaidAndChange(saleId);
     }

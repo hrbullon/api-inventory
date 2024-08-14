@@ -11,6 +11,10 @@ class DiscountRepository {
         });
     }
 
+    static async findById(id) {
+        return await Discount.findByPk(id);
+    };
+    
     static async create(data) {
         data.percentage = ((data.discount*100)/data.total_amount_sale).toFixed(2);
         return await Discount.create(data);
