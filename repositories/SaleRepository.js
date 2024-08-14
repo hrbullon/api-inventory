@@ -94,8 +94,8 @@ class SaleRepository {
                 { 
                     subtotal_amount: totalAmount, 
                     subtotal_amount_converted: totalAmountConverted,
-                    total_amount: (totalAmount-sale.discount_amount), 
-                    total_amount_converted: (totalAmountConverted-sale.discount_amount_converted)
+                    total_amount: (totalAmount-Number(sale.discount_amount)), 
+                    total_amount_converted: (totalAmountConverted-Number(sale.discount_amount_converted))
                 }, 
                 { where: { id: saleId }}
             );
