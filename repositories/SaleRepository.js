@@ -107,7 +107,7 @@ class SaleRepository {
         }
     }
 
-    static async updateDiscountAmount(saleId, discount, discountConverted){
+    static async updateDiscountAmount({ saleId, discount, discountConverted }){
 
         let sale = await this.findByPk(saleId)
 
@@ -121,6 +121,21 @@ class SaleRepository {
     
             sale.total_amount = Number(sale.subtotal_amount)-discount_amount;
             sale.total_amount_converted = Number(sale.subtotal_amount_converted)-discount_amount_converted;
+            
+            return sale.save();
+        }
+    }
+
+    static async substractDiscountAmount({ saleId, discount, discountConverted }) {
+
+        const sale = await this.findByPk(saleId);
+
+        if(sale){
+            
+            sale.discount_amount = Number(sale.discount_amount)-Number(discount);
+            sale.discount_amount_converted = Number(sale.discount_amount_converted)-Number(discountConverted);
+            sale.total_amount = Number(sale.total_amount)+Number(discount);
+            sale.total_amount_converted = Number(sale.total_amount_converted)+Number(discountConverted);
             
             return sale.save();
         }
