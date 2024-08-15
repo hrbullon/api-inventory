@@ -10,6 +10,12 @@ class DiscountRepository {
             where: {sale_id: saleId, deletedAt: IS_NULL}
         });
     }
+    
+    static async getAllDiscountsByCheckouSession(checkoutSessionId) {
+        return await Discount.findAll({
+            where: {checkout_session_id: checkoutSessionId, deletedAt: IS_NULL}
+        });
+    }
 
     static async findById(id) {
         return await Discount.findByPk(id);

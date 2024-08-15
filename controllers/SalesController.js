@@ -110,6 +110,9 @@ const closeSale = async (req, res) => {
 
         if(sale.state == SALE_STATE_PENDING)
         {
+            sale.description = req.body.description;
+            await sale.save();
+            
             const totalAmountChange = sale.total_amount_change;
             
             sale = await SaleRepository.changeState(saleId, SALE_STATE_COMPLETED );

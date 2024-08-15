@@ -11,12 +11,22 @@ const getAllDiscountsBySale = async (req, res) => {
     }
 }
 
+const getAllDiscountsByCheckouSession = async (req, res) => {
+    try {
+        const discounts = await DiscountRepository.getAllDiscountsByCheckouSession(req.params.checkoutSessionId);
+        successResponse( res, { discounts: discounts } );
+    } catch (error) {
+        handleError( res, error );
+    }
+}
+
 const createDiscount = async (req, res) => {
     try 
     {
         const { sale_id, discount, discount_converted } = req.body;
         const sale = await SaleRepository.findByPk(sale_id);
 
+        req.body.checkout_session_id = sale.checkout_session_id;
         req.body.total_amount_sale = sale.total_amount;
         req.body.total_amount_sale_converted = sale.total_amount_converted;
 
@@ -52,7 +62,7 @@ const deleteDiscount = async (req, res) => {
 
             successResponse( res, { discount: destroyed } );
         }
-        
+
     } catch (error) {
         handleError( res, error );
     }
@@ -60,6 +70,7 @@ const deleteDiscount = async (req, res) => {
 
 module.exports = {
     getAllDiscountsBySale,
+    getAllDiscountsByCheckouSession,
     createDiscount, 
     deleteDiscount
 }

@@ -8,6 +8,10 @@ Discount.init({
         type: DataTypes.INTEGER(),
         allowNull: false
     },
+    checkout_session_id: { 
+        type: DataTypes.CHAR(36),
+        allowNull: true
+    },
     description: { type: DataTypes.STRING(300) },
     percentage: { 
         type: DataTypes.DECIMAL(3,2),
