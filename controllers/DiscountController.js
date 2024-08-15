@@ -43,17 +43,16 @@ const deleteDiscount = async (req, res) => {
         if(discount)
         {
             const updated = await SaleRepository.substractDiscountAmount({
-                sale_id: discount.sale_id, 
+                saleId: discount.sale_id, 
                 discount: discount.discount, 
-                discount_converted: discount.discount_converted
+                discountConverted: discount.discount_converted
             });
 
             const destroyed = await DiscountRepository.destroy(req.params.id);
-            
+
             successResponse( res, { discount: destroyed } );
         }
-
-
+        
     } catch (error) {
         handleError( res, error );
     }

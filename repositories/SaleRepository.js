@@ -145,7 +145,7 @@ class SaleRepository {
             sale.total_amount = Number(sale.total_amount)+Number(discount);
             sale.total_amount_converted = Number(sale.total_amount_converted)+Number(discountConverted);
             
-            return sale.save();
+            return await sale.save();
         }
     }
 
