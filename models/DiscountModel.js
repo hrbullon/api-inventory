@@ -14,7 +14,7 @@ Discount.init({
     },
     description: { type: DataTypes.STRING(300) },
     percentage: { 
-        type: DataTypes.DECIMAL(3,2),
+        type: DataTypes.DECIMAL(12,2),
         allowNull: true
     },
     total_amount_sale: { 
