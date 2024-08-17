@@ -189,14 +189,24 @@ const getSummaryTransaction = async (checkoutSessionId) => {
         total_amount_cash_starting, 
         total_amount_change, 
         total_amount_in_cash, 
-        total_amount_out_cash } = transactions;
+        total_amount_out_cash,
+        total_amount_sales,
+        real_total_sale,
+        total_amount_cancelled } = transactions;
 
     let total_amount = payments_cash.length > 0? payments_cash[0].getDataValue('total_amount') : 0;
     let total_amount_payments = total_amount !== null? parseFloat(total_amount) : 0;
 
     let total_amount_cash_ending = ( total_amount_change+total_amount_cash_starting+total_amount_payments+total_amount_in_cash)-total_amount_out_cash;
-
-    let summary = { ...transactions, total_amount_cash_ending };
+    
+    let summary = { 
+        ...transactions, 
+        total_amount_cash_ending, 
+        total_amount_sales,
+        real_total_sale,
+        total_amount_cancelled
+    };
+    
     return summary;
 }
 

@@ -29,6 +29,10 @@ DailySales.init({
         type: DataTypes.DECIMAL(12,2),
         allowNull: false
     },
+    total_amount_cancelled: { 
+        type: DataTypes.DECIMAL(12,2),
+        allowNull: true
+    },
     total_amount_change: { 
         type: DataTypes.DECIMAL(12,2),
         allowNull: false

@@ -38,11 +38,11 @@ class DailySalesRepository {
                 checkout_session_id: item.checkout_session_id,
                 count_sales: item.count_sales,
                 total_amount_cash_starting: item.total_amount_cash_starting,
-                total_amount_sales: item.total_amount_sales,
+                total_amount_sales: (item.total_amount_sales-item.total_amount_cancelled),
                 total_amount_change: item.total_amount_change,
                 total_amount_in_cash: item.total_amount_in_cash,
                 total_amount_out_cash: item.total_amount_out_cash,
-                real_total_sale: item.real_total_sale,
+                real_total_sale: (item.real_total_sale-item.total_amount_cancelled),
                 total_amount_cash_ending: item.total_amount_cash_ending,
                 user: `${firstname}  ${lastname}`,
                 checkout: item.CheckoutSession.Checkout.name
