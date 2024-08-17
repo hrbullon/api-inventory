@@ -65,23 +65,25 @@ class ProductRepository {
 
     static async updateDetails(item, type){
 
-        Product.findByPk(item.product_id)
+        return Product.findByPk(item.product_id)
         .then(product => {
-            if(type == PRODUCT_INCREMENT){
-                
-                product.increment('quantity', { by: item.quantity });
-
-                if(item.salePrice !== undefined && product.price !== item.salePrice){
-                    product.price = item.salePrice;
-                    product.save();
-                }
-            }
-
             if(type == PRODUCT_DECREMENT){
                 product.decrement('quantity', { by: item.quantity });
             }
         });
         
+    }
+
+    static async incrementStock(products) {
+
+        products.map( item => {
+
+            Product.findByPk(item.product_id)
+            .then(product => {
+                product.increment('quantity', { by: item.quantity });
+            });
+        })
+
     }
 
     static async create(req){

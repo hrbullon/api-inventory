@@ -56,8 +56,8 @@ Payment.init({
         type: DataTypes.DECIMAL(12, 2),
         allowNull: false
     },
-    deleted: { type: DataTypes.ENUM("0","1"), comment: "0->Activo,1->Eliminado" },
-    state: { type: DataTypes.ENUM("0","1"), comment: "0->Pendiente,1->Aprobado" }
+    deleted: { type: DataTypes.ENUM("0","1"), comment: "0->Active,1->Deleted" },
+    state: { type: DataTypes.ENUM("0","1","2"), comment: "0->Pending,1->Approved,2->Cancelled" }
   }, {
     // Other model options go here
     sequelize, // We need to pass the connection instance

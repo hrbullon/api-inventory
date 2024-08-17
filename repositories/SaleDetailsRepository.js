@@ -6,6 +6,7 @@ const Sale = require('../models/SaleModel');
 const Product = require("../models/ProductModel");
 const Category = require("../models/CategoryModel");
 const SaleDetails = require("../models/SaleDetailsModel");
+const { SALE_STATE_COMPLETED } = require("../const/variables");
 
 class SaleDetailsRepository {
 
@@ -55,7 +56,10 @@ class SaleDetailsRepository {
               {
                 model: Sale,
                 attributes: [],
-                where: { checkout_session_id: checkoutSessionId },
+                where: {
+                    state: SALE_STATE_COMPLETED, 
+                    checkout_session_id: checkoutSessionId 
+                },
               },
               {
                 model: Product,

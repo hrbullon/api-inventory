@@ -7,8 +7,6 @@ const SaleRepository = require('../repositories/SaleRepository');
 const PaymentsRepository = require('../repositories/PaymentsRepository');
 const PaymentsDetailsRepository = require('../repositories/PaymentsDetailsRepository');
 
-const { PAYMENT_DELETED_FALSE } = require('../const/variables');
-
 const getAllPaymentsBySale = async (req, res) => {
     try {
         
@@ -36,7 +34,6 @@ const createPayment = async (req, res) => {
         let paymentModel = {
             ...req.body,
             date,
-            deleted: PAYMENT_DELETED_FALSE,
             checkout_id:1,//Still to get a multi chekout register
             user_id: decodedToken.user.id
         } 
@@ -47,19 +44,10 @@ const createPayment = async (req, res) => {
 
             payment_details.map( async (item) => {
                 
-                let payments = await PaymentsRepository.findAllBySale(item.sale_id);
-                
-                //Get total amount paid by sale
-                let totalAmountPaid = payments.reduce((acum, payment) =>{ return ( acum + Number(payment.total_amount)) }, 0);
-                let totalAmountPaidConverted = payments.reduce((acum, payment) => { return (acum + Number(payment.total_amount_converted)) }, 0);
-                
-                totalAmountPaid += Number(item.total_amount);
-                totalAmountPaidConverted += Number(item.total_amount_converted);
-
-                const totalPaid = {
-                    total_amount: totalAmountPaid,
-                    total_amount_converted: totalAmountPaidConverted,
-                }
+                //let payments = await PaymentsRepository.findAllBySale(item.sale_id);
+                const totalPaid = await PaymentsRepository.get_total_amount_paid_by_sale(item.sale_id);
+                totalPaid.total_amount += Number(item.total_amount);
+                totalPaid.total_amount_converted += Number(item.total_amount_converted);
 
                 await SaleRepository.updateTotalPaidAndChange(item.sale_id, totalPaid);
             });

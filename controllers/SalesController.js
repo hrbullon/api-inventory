@@ -17,6 +17,8 @@ const {
     TRANSACTION_TYPE_CHECKOUT_CANCEL_SALE,
     SALE_STATE_CANCELLED} = require('../const/variables');
 const CheckoutRegisterRepository = require('../repositories/CheckoutRegisterRepository');
+const PaymentRepository = require('../repositories/PaymentsRepository');
+const DiscountRepository = require('../repositories/DiscountRepository');
 
 const getAllSales = async (req, res) => {
     
@@ -143,21 +145,24 @@ const deleteSale = async (req, res) => {
         const decodedToken = jwt.verify(token, process.env.JWT_SEED);
         
         let sale = await SaleRepository.findByPk(id);
-        //Get data customer
-        const customer = await CustomerRepository.findByPk(sale.customer_id);
+
 
         if(sale){
-            //Decrement stock on products
-            await ProductRepository.updateDetails(sale.SaleDetails, PRODUCT_INCREMENT);
 
-            //Chage state of sale
-            sale = await SaleRepository.changeState(id, SALE_STATE_CANCELLED);
+            //Increment stock on products
+            await ProductRepository.incrementStock(sale.SaleDetails);
+
+            //Chage states of sale and payments
+            await SaleRepository.changeState(id, SALE_STATE_CANCELLED);
+            await PaymentRepository.cancelBySale(id);
+            await DiscountRepository.cancelBySale(id);
             
             const model = {
-                checkout_id: sale.checkout_id,
+                date: sale.date,
+                checkout_session_id: sale.checkout_session_id,
                 user_id: decodedToken.user.id,
                 transaction_id: TRANSACTION_TYPE_CHECKOUT_CANCEL_SALE,
-                note: `Venta - ${sale.code} - (ANULADA) - ${customer.name}`,
+                note: `Venta - ${sale.code} - (ANULADA)`,
                 total_amount_in: 0,
                 total_amount_out: sale.total_amount
             };

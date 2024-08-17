@@ -35,6 +35,7 @@ Discount.init({
         type: DataTypes.DECIMAL(12,2),
         allowNull: false
     },
+    state: { type: DataTypes.ENUM("1","2"), comment: "1->Active,2->Cancelled" },
     deletedAt: {
         type: DataTypes.DATE,
         allowNull: true, 

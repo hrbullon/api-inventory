@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { IS_NULL } = require('../const/variables');
+const { IS_NULL, DISCOUNT_STATE_CANCELLED, DISCOUNT_STATE_ACTIVE } = require('../const/variables');
 const Discount = require("../models/DiscountModel");
 
 class DiscountRepository { 
@@ -13,7 +13,11 @@ class DiscountRepository {
     
     static async getAllDiscountsByCheckouSession(checkoutSessionId) {
         return await Discount.findAll({
-            where: {checkout_session_id: checkoutSessionId, deletedAt: IS_NULL}
+            where: {
+                checkout_session_id: checkoutSessionId, 
+                state: DISCOUNT_STATE_ACTIVE,
+                deletedAt: IS_NULL
+            }
         });
     }
 
@@ -22,6 +26,7 @@ class DiscountRepository {
     };
     
     static async create(data) {
+        data.state = DISCOUNT_STATE_ACTIVE;
         data.percentage = ((data.discount*100)/data.total_amount_sale).toFixed(2);
         return await Discount.create(data);
     };
@@ -31,6 +36,15 @@ class DiscountRepository {
           where: { id: id} 
         });
     };
+    
+    static async cancelBySale(saleId){
+
+        return await Discount.update({
+            state: DISCOUNT_STATE_CANCELLED
+        },{ 
+            where: { sale_id: saleId } 
+        });
+    }
 }
 
 module.exports = DiscountRepository

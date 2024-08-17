@@ -3,7 +3,12 @@ const  Sequelize  = require("sequelize");
 const Payment = require("../models/PaymentModel");
 const PaymentMethod = require("../models/PaymentMethodModel");
 const PaymentDetails = require("../models/PaymentDetailsModel");
-const { PAYMENT_DELETED_FALSE } = require("../const/variables");
+
+const { 
+    PAYMENT_STATE_ACTIVE, 
+    PAYMENT_DELETED_FALSE, 
+    PAYMENT_STATE_CANCELLED 
+} = require('../const/variables');
 
 class PaymentRepository { 
 
@@ -15,7 +20,10 @@ class PaymentRepository {
 
         const payments = await Payment.findAll({
             attributes: ['id','reference','exchange_amount','total_amount','total_amount_converted'],
-            where: { deleted: PAYMENT_DELETED_FALSE },
+            where: { 
+                state: PAYMENT_STATE_ACTIVE,
+                deleted: PAYMENT_DELETED_FALSE 
+            },
             include: [ 
                 {
                     model: PaymentDetails,
@@ -38,7 +46,11 @@ class PaymentRepository {
     }
 
     static async create(data){
+
         const model = data;
+        model.state = PAYMENT_STATE_ACTIVE;
+        model.deleted = PAYMENT_DELETED_FALSE;
+
         return await Payment.create(model);
     }
     
@@ -54,6 +66,26 @@ class PaymentRepository {
         }
     }
 
+    static async cancelBySale(saleId){
+
+        const details = await PaymentDetails.findAll({
+            where: { sale_id:  saleId}
+        })
+
+        if(details.length > 0){
+
+            details.map( async item => {
+                await Payment.update({
+                    state: PAYMENT_STATE_CANCELLED
+                }, {
+                    where: { id: item.payment_id },
+                });
+            });
+        }
+
+        return details;
+    }
+
     static async get_total_amount_paid_by_sale(saleId){
 
         return await PaymentDetails.findOne({
@@ -64,7 +96,10 @@ class PaymentRepository {
             include: [
                 {
                     model: Payment,
-                    where: { deleted: PAYMENT_DELETED_FALSE }
+                    where: { 
+                        state: PAYMENT_STATE_ACTIVE,
+                        deleted: PAYMENT_DELETED_FALSE 
+                    }
                 }
             ],
             where: {
@@ -76,8 +111,8 @@ class PaymentRepository {
     static async summaryPaymentsBySession(checkoutSessionId, payment_method_id = "") {
 
         const condition = payment_method_id ?
-                { checkout_session_id: checkoutSessionId, payment_method_id, deleted: PAYMENT_DELETED_FALSE } :   
-                { checkout_session_id: checkoutSessionId, deleted: PAYMENT_DELETED_FALSE };
+                { checkout_session_id: checkoutSessionId, state: PAYMENT_STATE_ACTIVE, payment_method_id, deleted: PAYMENT_DELETED_FALSE } :   
+                { checkout_session_id: checkoutSessionId, state: PAYMENT_STATE_ACTIVE, deleted: PAYMENT_DELETED_FALSE };
 
         const payments = await Payment.findAll({
             attributes: [

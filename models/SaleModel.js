@@ -77,7 +77,7 @@ Sale.init(
             type: DataTypes.DECIMAL(12,2),
             allowNull: true
         },
-        state: { type: DataTypes.ENUM("0","1","2"), comment: "0->Pending,1->Finished,2->Canceled" }
+        state: { type: DataTypes.ENUM("0","1","2"), comment: "0->Pending,1->Finished,2->Cancelled" }
     },
     {
         sequelize,
