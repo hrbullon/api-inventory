@@ -9,7 +9,8 @@ const {
     TRANSACTION_TYPE_CHECKOUT_OPEN, 
     TRANSACTION_TYPE_CHECKOUT_IN_CASH, 
     TRANSACTION_TYPE_CHECKOUT_OUT_CASH, 
-    CHECKOUT_SALE} = require("../const/variables");
+    CHECKOUT_SALE,
+    TRANSACTION_TYPE_CHECKOUT_CANCEL_SALE} = require("../const/variables");
 const CheckoutSession = require("../models/CheckOutSessionModel");
 
 const Op = Sequelize.Op;
@@ -124,6 +125,27 @@ class CheckoutRegisterRepository {
         }
     }
 
+    static async getTotalAmountByTransaction({ column, transaction_type, checkout_session_id }){
+        
+        return await CheckoutRegister.findAll({
+            attributes: [
+                [
+                    Sequelize.fn('COUNT', 
+                    Sequelize.col('*')), 
+                    'quantity'
+                ],
+                [   Sequelize.fn('SUM', 
+                    Sequelize.col(`CheckoutRegister.${ column }`)), 
+                    'total_amount'
+                ],
+            ],
+            where: {                
+                checkout_session_id: checkout_session_id,
+                transaction_id: transaction_type 
+            },
+        });
+    }
+
     //getTotalAmountInOut
     static async getSumTotalAmount(condition, field) {
         
@@ -156,22 +178,17 @@ class CheckoutRegisterRepository {
         });
         
         /***** Get total sales (count)*****/
-        const sales = await CheckoutRegister.findAll({
-            attributes: [
-                [
-                    Sequelize.fn('COUNT', 
-                    Sequelize.col('*')), 
-                    'count_sales' //Alias
-                ],
-                [   Sequelize.fn('SUM', 
-                    Sequelize.col('CheckoutRegister.total_amount_in')), 
-                    'total_amount_sales' //Alias
-                ],
-            ],
-            where: {                
-                checkout_session_id: checkoutSessionId,
-                transaction_id: TRANSACTION_TYPE_SALE 
-            },
+        const sales = await this.getTotalAmountByTransaction({
+            column: 'total_amount_in', 
+            transaction_type: TRANSACTION_TYPE_SALE, 
+            checkout_session_id: checkoutSessionId
+        });
+        
+        /***** Get total cancelled sales****/
+        const cancelled_sales = await this.getTotalAmountByTransaction({
+            column: 'total_amount_out', 
+            transaction_type: TRANSACTION_TYPE_CHECKOUT_CANCEL_SALE, 
+            checkout_session_id: checkoutSessionId
         });
 
         const transactionTypeChange = {
@@ -189,13 +206,16 @@ class CheckoutRegisterRepository {
             transactionType: TRANSACTION_TYPE_CHECKOUT_OUT_CASH
         };
 
-        let total_amount_sales_result = sales[0].getDataValue('total_amount_sales');
+        let total_amount_sales_result = sales[0].getDataValue('total_amount');
         let total_amount_sales = (total_amount_sales_result)? parseFloat(total_amount_sales_result) : 0;
+        let total_amount_cancelled_result = cancelled_sales[0].getDataValue('total_amount');
+        let total_amount_cancelled = (total_amount_cancelled_result)? parseFloat(total_amount_cancelled_result) : 0;
 
         return { 
             total_amount_cash_starting: parseFloat(openChash[0].getDataValue('total_amount_in')),
-            count_sales: parseFloat(sales[0].getDataValue('count_sales')),
+            count_sales: parseFloat(sales[0].getDataValue('quantity')-cancelled_sales[0].getDataValue('quantity')),
             total_amount_sales,
+            total_amount_cancelled,
             total_amount_change: await this.getSumTotalAmount(transactionTypeChange,'total_amount_out'),
             total_amount_in_cash: await this.getSumTotalAmount(transactionTypeInCash,'total_amount_in'),
             total_amount_out_cash: await this.getSumTotalAmount(transactionTypeOutCash, 'total_amount_out'),
