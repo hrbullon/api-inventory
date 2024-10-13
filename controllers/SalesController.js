@@ -5,7 +5,6 @@ const { handleError, successResponse } = require('../utils/utils');
 //Repositroy
 const SaleRepository = require('../repositories/SaleRepository');
 const ProductRepository = require('../repositories/ProductRepository');
-const CustomerRepository = require('../repositories/CustomerRepository');
 const CheckoutRepository = require('../repositories/CheckoutRepository');
 const SaleDetailsRepository = require('../repositories/SaleDetailsRepository');
 
@@ -13,9 +12,9 @@ const {
     SALE_STATE_PENDING, 
     SALE_STATE_COMPLETED,
     PRODUCT_DECREMENT,
-    PRODUCT_INCREMENT,
     TRANSACTION_TYPE_CHECKOUT_CANCEL_SALE,
-    SALE_STATE_CANCELLED} = require('../const/variables');
+    SALE_STATE_CANCELLED,
+    PRODUCT_INCREMENT} = require('../const/variables');
 const CheckoutRegisterRepository = require('../repositories/CheckoutRegisterRepository');
 const PaymentRepository = require('../repositories/PaymentsRepository');
 const DiscountRepository = require('../repositories/DiscountRepository');
@@ -81,6 +80,7 @@ const createSaleDetails = async (req, res) => {
         let added = await SaleDetailsRepository.create(req.body);
     
         if(added){
+           
             //Decrement stock on products
             await ProductRepository.updateDetails(added, PRODUCT_DECREMENT);
             const sale = await SaleRepository.findByPk(req.body.sale_id);  
@@ -181,13 +181,21 @@ const deleteSale = async (req, res) => {
 
 const deleteSaleDetails = async (req, res) => {
     try {
+
         const { id, detail } = req.params;
 
-        const destroyed = await SaleRepository.deleteSaleDetails(id, detail);
-        const sale = await SaleRepository.findByPk(id);  
-        await SaleRepository.updateTotalAmountSale(id, sale.SaleDetails);  
+        const detailModel = await SaleRepository.findDetail(detail);
 
-        successResponse( res, { deleted: destroyed } );
+        if(detailModel){
+
+            const destroyed = await SaleRepository.deleteSaleDetails(id, detail);
+            const sale = await SaleRepository.findByPk(id);  
+
+            await ProductRepository.updateDetails(detailModel, PRODUCT_INCREMENT);
+            await SaleRepository.updateTotalAmountSale(id, sale.SaleDetails);  
+            
+            successResponse( res, { deleted: destroyed } );
+        }
 
     } catch (error) {
         handleError( res, error );

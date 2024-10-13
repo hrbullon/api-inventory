@@ -52,6 +52,10 @@ class SaleRepository {
         return sales;
     }
 
+    static async findDetail(id){
+        return await SaleDetails.findByPk(id);
+    }
+
     static async create(req, user) {
 
         delete req.body.sale_details;
@@ -95,8 +99,8 @@ class SaleRepository {
 
         if(sale){
             
-            const totalAmount = details.reduce((acum, item) => acum + item.subtotal_amount, 0);
-            const totalAmountConverted = details.reduce((acum, item) => acum + item.subtotal_amount_converted, 0);
+            const totalAmount = details.reduce((acum, item) => acum + Number(item.subtotal_amount), 0);
+            const totalAmountConverted = details.reduce((acum, item) => acum + Number(item.subtotal_amount_converted), 0);
             
             await Sale.update(
                 { 

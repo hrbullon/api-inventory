@@ -67,8 +67,13 @@ class ProductRepository {
 
         return Product.findByPk(item.product_id)
         .then(product => {
+            
             if(type == PRODUCT_DECREMENT){
                 product.decrement('quantity', { by: item.quantity });
+            }
+            
+            if(type == PRODUCT_INCREMENT){
+                product.increment('quantity', { by: item.quantity });
             }
         });
         
